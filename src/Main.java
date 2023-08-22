@@ -1,7 +1,12 @@
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -21,7 +26,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         BorderPane root = new BorderPane();
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1200, 900);
 
         root.setCenter(tabPane);
 
@@ -30,6 +35,7 @@ public class Main extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Character App");
+        root.setBackground(new Background(new BackgroundFill(Color.rgb(40, 40, 40), CornerRadii.EMPTY, Insets.EMPTY)));
         primaryStage.show();
     }
 
