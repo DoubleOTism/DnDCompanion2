@@ -20,6 +20,7 @@ public class Main extends Application {
         launch(args);
     }
 
+    CharacterData characterData;
     private List<CharacterData> characterDataList = new ArrayList<>();
     private List<CharacterTab> characterTabs = new ArrayList<>();
 
@@ -137,8 +138,9 @@ public class Main extends Application {
                     customStats.put(statName, statValue);
                 }
             }
-
-            createNewCharacterTab(name, race, baseStats, customStats);
+            List<EquipmentItem> allItems = new ArrayList<>();
+            List<EquipmentItem> equippedItems = new ArrayList<>();
+            createNewCharacterTab(name, race, baseStats, customStats, allItems, equippedItems);
             dialog.close();
 
         });
@@ -148,8 +150,8 @@ public class Main extends Application {
         dialog.showAndWait();
     }
 
-    private void createNewCharacterTab(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats) {
-        CharacterData characterData = new CharacterData(characterName, characterRace, baseStats, customStats);
+    private void createNewCharacterTab(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems) {
+        CharacterData characterData = new CharacterData(characterName, characterRace, baseStats, customStats, allItems, equippedItems);
         CharacterTab characterTab = new CharacterTab(characterData);
         characterDataList.add(characterData);
         characterTabs.add(characterTab);

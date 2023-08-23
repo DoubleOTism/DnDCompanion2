@@ -12,12 +12,17 @@ public class CharacterData implements Serializable {
 
     private Map<String, Integer> customStats;
 
+    private List<EquipmentItem> equippedItems;
+    private List<EquipmentItem> allItems;
 
-    public CharacterData(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> custoMStats) {
+
+    public CharacterData(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems) {
         this.characterName = characterName;
         this.characterRace = characterRace;
         this.baseStats = baseStats;
-        this.customStats = custoMStats;
+        this.customStats = customStats;
+        this.allItems = allItems;
+        this.equippedItems = equippedItems;
     }
 
     public String getCharacterName() {
@@ -34,6 +39,22 @@ public class CharacterData implements Serializable {
 
     public Map<String, Integer> getCustomStats() {
         return customStats;
+    }
+
+    public List<EquipmentItem> getInventory() {
+        return allItems;
+    }
+
+    public List<EquipmentItem> getEquippedItems() {
+        return equippedItems;
+    }
+
+    public void addEquippedItem(EquipmentItem item) {
+        equippedItems.add(item);
+    }
+
+    public void addItem(EquipmentItem item) {
+        allItems.add(item);
     }
 
 }
