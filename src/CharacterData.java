@@ -6,19 +6,34 @@ import java.util.Map;
 
 public class CharacterData implements Serializable {
     private String characterName;
-    private Map<String, Integer> statistics = new HashMap<>();
+    private String characterRace;
 
-    public CharacterData(String characterName) {
+    private Map<String, Integer> baseStats;
+
+    private Map<String, Integer> customStats;
+
+
+    public CharacterData(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> custoMStats) {
         this.characterName = characterName;
+        this.characterRace = characterRace;
+        this.baseStats = baseStats;
+        this.customStats = custoMStats;
     }
 
     public String getCharacterName() {
         return characterName;
     }
 
+    public String getCharacterRace() {
+        return characterRace;
+    }
 
-    public void updateStats() {
-        // Implement your logic to update character stats based on equipped items
+    public Map<String, Integer> getBaseStats() {
+        return baseStats;
+    }
+
+    public Map<String, Integer> getCustomStats() {
+        return customStats;
     }
 
 }
