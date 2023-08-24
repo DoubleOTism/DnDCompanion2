@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class EquipmentItem implements Serializable {
     private String name;
@@ -38,6 +39,7 @@ public class EquipmentItem implements Serializable {
     public String getEquipSlots() {
         return selectedSlot;
     }
+
 
 
     @Override

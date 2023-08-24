@@ -19,8 +19,15 @@ import java.util.Map;
 public class CharacterTab extends Tab {
     private CharacterData characterData;
 
+    private CharacterTab characterTab;
+    private VBox rightBox = new VBox();
+
+    private List<EquipmentSlotHandler> slotHandlers = new ArrayList<>();
+
+
     public CharacterTab(CharacterData characterData) {
         this.characterData = characterData;
+        this.characterTab = this;
         ImageView characterImageView = createCharacterImageView();
         HBox mainBox = new HBox();
 
@@ -29,21 +36,69 @@ public class CharacterTab extends Tab {
         characterName.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
         characterRace.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
 
-
-
-        //equipment buttons
-        Button equipHelmetButton = new Button("Helma");
+    //Tlačítka pro výbavu
         List<EquipmentItem> allItems = characterData.getInventory();
         List<EquipmentItem> equippedItems = characterData.getEquippedItems();
-        EquipmentSlotHandler helmaSlotHandler = new EquipmentSlotHandler("Helma", equipHelmetButton, equippedItems, allItems);
+        //Helma
+        Button equipHelmetButton = new Button("Helma");
+        EquipmentSlotHandler helmaSlotHandler = new EquipmentSlotHandler("Helma", equipHelmetButton, equippedItems, allItems, characterData, characterTab);
         equipHelmetButton.setLayoutX(500);
-        equipHelmetButton.setLayoutY(37);
-        Button equipChestplateButton = new Button("Equip Chestplate");
+        equipHelmetButton.setLayoutY(40);
+        //Chestplate
+        Button equipChestplateButton = new Button("Hrudní plát");
+        EquipmentSlotHandler chestplateSlotHandler = new EquipmentSlotHandler("Hrudní plát", equipChestplateButton, equippedItems, allItems, characterData, characterTab);
+        equipChestplateButton.setLayoutX(500);
+        equipChestplateButton.setLayoutY(150);
+        //Ruce
+        Button equipArmsButton = new Button("Zbroj rukou");
+        EquipmentSlotHandler armsSlotHandler = new EquipmentSlotHandler("Zbroj rukou", equipArmsButton, equippedItems, allItems, characterData, characterTab);
+        equipArmsButton.setLayoutX(500);
+        equipArmsButton.setLayoutY(250);
+        //Zbroj nohou
+        Button equipLeggingsButton = new Button("Zbroj nohou");
+        EquipmentSlotHandler leggingsSlotHandler = new EquipmentSlotHandler("Zbroj nohou", equipLeggingsButton, equippedItems, allItems, characterData, characterTab);
+        equipLeggingsButton.setLayoutX(500);
+        equipLeggingsButton.setLayoutY(400);
+        //Boty
+        Button equipBootsButton = new Button("Boty");
+        EquipmentSlotHandler bootsSlotHandler = new EquipmentSlotHandler("Boty", equipBootsButton, equippedItems, allItems, characterData, characterTab);
+        equipBootsButton.setLayoutX(500);
+        equipBootsButton.setLayoutY(500);
+        //Prsteny
+        Button equipRing1Button = new Button("Prsten");
+        EquipmentSlotHandler ring1SlotHandler = new EquipmentSlotHandler("Prsten", equipRing1Button, equippedItems, allItems, characterData, characterTab);
+        equipRing1Button.setLayoutX(20);
+        equipRing1Button.setLayoutY(80);
+
+        Button equipRing2Button = new Button("Prsten");
+        EquipmentSlotHandler ring2SlotHandler = new EquipmentSlotHandler("Prsten", equipRing2Button, equippedItems, allItems, characterData, characterTab);
+        equipRing2Button.setLayoutX(20);
+        equipRing2Button.setLayoutY(120);
+
+        Button equipRing3Button = new Button("Prsten");
+        EquipmentSlotHandler ring3SlotHandler = new EquipmentSlotHandler("Prsten", equipRing3Button, equippedItems, allItems, characterData, characterTab);
+        equipRing3Button.setLayoutX(20);
+        equipRing3Button.setLayoutY(160);
+
+        Button equipRing4Button = new Button("Prsten");
+        EquipmentSlotHandler ring4SlotHandler = new EquipmentSlotHandler("Prsten", equipRing4Button, equippedItems, allItems, characterData, characterTab);
+        equipRing4Button.setLayoutX(20);
+        equipRing4Button.setLayoutY(200);
+
+        slotHandlers.add(helmaSlotHandler);
+        slotHandlers.add(chestplateSlotHandler);
+        slotHandlers.add(armsSlotHandler);
+        slotHandlers.add(leggingsSlotHandler);
+        slotHandlers.add(bootsSlotHandler);
+        slotHandlers.add(ring1SlotHandler);
+        slotHandlers.add(ring2SlotHandler);
+        slotHandlers.add(ring3SlotHandler);
+        slotHandlers.add(ring4SlotHandler);
 
 
 
         Pane buttonOverlayPane = new Pane();
-        buttonOverlayPane.getChildren().addAll(equipHelmetButton);
+        buttonOverlayPane.getChildren().addAll(equipHelmetButton, equipChestplateButton, equipArmsButton, equipLeggingsButton, equipBootsButton, equipRing1Button, equipRing2Button, equipRing3Button, equipRing4Button);
 
         StackPane imagePane = new StackPane(characterImageView, buttonOverlayPane);
 
@@ -56,8 +111,6 @@ public class CharacterTab extends Tab {
         Button newArmorButton = new Button("Přidat novou zbroj");
         newArmorButton.setOnAction(event -> showEquipmentDialog());
         leftBox.getChildren().addAll(imagePane, characterName, characterRace, newArmorButton);
-        VBox rightBox = new VBox();
-        rightBox.getChildren().addAll();
 
 
 
@@ -66,32 +119,43 @@ public class CharacterTab extends Tab {
 
 
 
-        // Base Stats
+
+        /**
+        // Základní staty
         Label baseStatsLabel = new Label("Základní Staty:");
         baseStatsLabel.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
         rightBox.getChildren().add(baseStatsLabel);
+
         characterData.getBaseStats().forEach((stat, value) -> {
             Label statLabel = new Label(stat + ": " + value);
             statLabel.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
-
             rightBox.getChildren().add(statLabel);
         });
-        // Custom Stats
+
+        // Vlastní staty
         Label customStatsLabel = new Label("Vlastní Staty:");
         customStatsLabel.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
         rightBox.getChildren().add(customStatsLabel);
+
         characterData.getCustomStats().forEach((stat, value) -> {
             Label statLabel = new Label(stat + ": " + value);
             statLabel.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
             rightBox.getChildren().add(statLabel);
         });
+        **/
 
+        updateTotalStatsLabel(characterData.getTotalStats());
         mainBox.getChildren().addAll(leftBox, rightBox);
+
         setContent(mainBox);
 
 
 
 
+    }
+
+    public List<EquipmentSlotHandler> getSlotHandlers() {
+        return slotHandlers;
     }
 
     private void showEquipmentDialog() {
@@ -177,6 +241,19 @@ public class CharacterTab extends Tab {
     ) {
         EquipmentItem equipmentItem = new EquipmentItem(itemName, selectedSlot, modifiedStats, hpChange, weight);
         characterData.addItem(equipmentItem);
+    }
+
+    public void updateTotalStatsLabel(Map<String, Integer> totalStats) {
+
+        // Clear existing labels
+        rightBox.getChildren().removeIf(node -> node instanceof Label);
+
+        // Update the labels based on the totalStats map
+        totalStats.forEach((stat, value) -> {
+            Label statLabel = new Label(stat + ": " + value);
+            statLabel.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
+            rightBox.getChildren().add(statLabel);
+        });
     }
 
     private ImageView createCharacterImageView() {

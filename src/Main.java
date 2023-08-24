@@ -140,7 +140,8 @@ public class Main extends Application {
             }
             List<EquipmentItem> allItems = new ArrayList<>();
             List<EquipmentItem> equippedItems = new ArrayList<>();
-            createNewCharacterTab(name, race, baseStats, customStats, allItems, equippedItems);
+            Map<Button, String> equippedItemNames = new HashMap<>();
+            createNewCharacterTab(name, race, baseStats, customStats, allItems, equippedItems, equippedItemNames);
             dialog.close();
 
         });
@@ -150,8 +151,8 @@ public class Main extends Application {
         dialog.showAndWait();
     }
 
-    private void createNewCharacterTab(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems) {
-        CharacterData characterData = new CharacterData(characterName, characterRace, baseStats, customStats, allItems, equippedItems);
+    private void createNewCharacterTab(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems,Map<Button, String> equippedItemNames) {
+        CharacterData characterData = new CharacterData(characterName, characterRace, baseStats, customStats, allItems, equippedItems, equippedItemNames);
         CharacterTab characterTab = new CharacterTab(characterData);
         characterDataList.add(characterData);
         characterTabs.add(characterTab);
@@ -191,8 +192,19 @@ public class Main extends Application {
             characterDataList.add(loadedCharacterData);
             characterTabs.add(loadedCharacterTab);
             tabPane.getTabs().add(loadedCharacterTab);
+
+            // Update equipped items' buttons based on saved data
+            Map<Button, String> equippedItemNames = loadedCharacterData.getEquippedItemNames();
+            List<EquipmentSlotHandler> slotHandlers = loadedCharacterTab.getSlotHandlers();
+            for (EquipmentSlotHandler slotHandler : slotHandlers) {
+                Button slotButton = slotHandler.getSlotButton();
+                String equippedItemName = equippedItemNames.get(slotButton);
+                slotHandler.updateSlotButtonText(slotButton, equippedItemName);
+            }
         }
     }
+
+
 
 
 
