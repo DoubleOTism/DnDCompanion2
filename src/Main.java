@@ -152,7 +152,7 @@ public class Main extends Application {
     }
 
     private void createNewCharacterTab(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems,Map<Button, String> equippedItemNames) {
-        CharacterData characterData = new CharacterData(characterName, characterRace, baseStats, customStats, allItems, equippedItems, equippedItemNames);
+        CharacterData characterData = new CharacterData(characterName, characterRace, baseStats, customStats, allItems, equippedItems);
         CharacterTab characterTab = new CharacterTab(characterData);
         characterDataList.add(characterData);
         characterTabs.add(characterTab);
@@ -194,11 +194,11 @@ public class Main extends Application {
             tabPane.getTabs().add(loadedCharacterTab);
 
             // Update equipped items' buttons based on saved data
-            Map<Button, String> equippedItemNames = loadedCharacterData.getEquippedItemNames();
+            Map<String, String> equippedItemNames = loadedCharacterData.getEquippedItemNames();
             List<EquipmentSlotHandler> slotHandlers = loadedCharacterTab.getSlotHandlers();
             for (EquipmentSlotHandler slotHandler : slotHandlers) {
                 Button slotButton = slotHandler.getSlotButton();
-                String equippedItemName = equippedItemNames.get(slotButton);
+                String equippedItemName = equippedItemNames.get(slotHandler.getSlotName());
                 slotHandler.updateSlotButtonText(slotButton, equippedItemName);
             }
         }

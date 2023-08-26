@@ -19,18 +19,17 @@ public class CharacterData implements Serializable {
 
     private Map<String, Integer> totalStats;
 
-    private Map<Button, String> equippedItemNames;
+    private Map<String, String> equippedItemNames = new HashMap<>();
 
 
 
-    public CharacterData(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems, Map<Button, String> equippedItemNames) {
+    public CharacterData(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems) {
         this.characterName = characterName;
         this.characterRace = characterRace;
         this.baseStats = baseStats;
         this.customStats = customStats;
         this.allItems = allItems;
         this.equippedItems = equippedItems;
-        this.equippedItemNames = equippedItemNames;
         totalStats = new HashMap<>(baseStats);
         customStats.forEach((stat, value) -> totalStats.merge(stat, value, Integer::sum));
 
@@ -64,9 +63,23 @@ public class CharacterData implements Serializable {
         equippedItems.add(item);
     }
 
-    public Map<Button, String> getEquippedItemNames() {
+
+
+
+    public void setEquippedItemName(String slotName, String itemName) {
+        equippedItemNames.put(slotName, itemName);
+    }
+
+    public String getEquippedItemName(String slotName) {
+        return equippedItemNames.getOrDefault(slotName, null);
+    }
+
+    public Map<String, String> getEquippedItemNames() {
         return equippedItemNames;
     }
+
+
+
 
 
     public void addItem(EquipmentItem item) {

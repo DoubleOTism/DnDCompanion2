@@ -28,37 +28,60 @@ public class EquipmentSlotHandler {
         this.allItems = allItems;
         this.characterData = characterData;
         this.characterTab = characterTab;
-
+        updateSlotButtonText(slotButton, characterData.getEquippedItemName(slotName));
         slotButton.setOnAction(event -> handleButtonClick());
     }
 
 
-
-
-
-
+    String getSlotName() {
+        return slotName;
+    }
 
 
     private void handleButtonClick() {
-        if (slotButton.getText().equals(slotName)) {
+        EquipmentItem equippedItemToRemove = null;
+        String equippedItemNameToRemove = characterData.getEquippedItemName(slotName);
+
+        // Find the EquipmentItem to remove based on the equipped item name
+        for (EquipmentItem equippedItem : equippedItems) {
+            if (equippedItem.getName().equals(equippedItemNameToRemove)) {
+                equippedItemToRemove = equippedItem;
+                break;
+            }
+        }
+
+        if (equippedItemToRemove != null) {
+            equippedItems.remove(equippedItemToRemove);
+            characterData.setEquippedItemName(slotName, null); // Clear the equipped item name
+
+
+            // Recalculate totalStats after unequipping
+            characterData.updateTotalStats(equippedItems);
+            characterTab.updateTotalStatsLabel(characterData.getTotalStats());
+
+            // Update button text to show the slot name
+            updateSlotButtonText(slotButton, slotName);
+        } else {
+            // Show equipment selection dialog and handle the selected item
             EquipmentItem selectedEquipment = showEquipmentSelectionDialog(slotName);
             if (selectedEquipment != null) {
-                unequipMultiSlotItems(slotButton);
                 equippedItems.add(selectedEquipment);
+                characterData.setEquippedItemName(slotName, selectedEquipment.getName()); // Update equipped item name
+
+                // Recalculate totalStats after equipping
+                characterData.updateTotalStats(equippedItems);
+                characterTab.updateTotalStatsLabel(characterData.getTotalStats());
+
+                // Update button text to show the equipped item's name
                 updateSlotButtonText(slotButton, selectedEquipment.getName());
-                characterData.updateTotalStats(equippedItems); // Pass the updated list of equipped items
-                characterTab.updateTotalStatsLabel(characterData.getTotalStats()); // Update label in CharacterTab
-                characterData.getEquippedItemNames().put(slotButton, selectedEquipment.getName());
             }
-        } else {
-            EquipmentItem equippedItem = getEquippedItemInSlot(slotName);
-            unequipMultiSlotItems(slotButton);
-            updateSlotButtonText(slotButton, null);
-            characterData.updateTotalStats(equippedItems); // Pass the updated list of equipped items
-            characterTab.updateTotalStatsLabel(characterData.getTotalStats()); // Update label in CharacterTab
-            characterData.getEquippedItemNames().remove(slotButton);
         }
     }
+
+
+
+
+
 
 
 
