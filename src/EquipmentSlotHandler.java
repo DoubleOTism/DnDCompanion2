@@ -21,7 +21,10 @@ public class EquipmentSlotHandler {
     private CharacterData characterData;
     private CharacterTab characterTab;
 
-    public EquipmentSlotHandler(String slotName, Button slotButton, List<EquipmentItem> equippedItems, List<EquipmentItem> allItems, CharacterData characterData, CharacterTab characterTab) {
+    private String uniqueIdentifier;
+
+    public EquipmentSlotHandler(String uniqueIdentifier, String slotName, Button slotButton, List<EquipmentItem> equippedItems, List<EquipmentItem> allItems, CharacterData characterData, CharacterTab characterTab) {
+        this.uniqueIdentifier = uniqueIdentifier;
         this.slotName = slotName;
         this.slotButton = slotButton;
         this.equippedItems = equippedItems;
@@ -40,7 +43,7 @@ public class EquipmentSlotHandler {
 
     private void handleButtonClick() {
         EquipmentItem equippedItemToRemove = null;
-        String equippedItemNameToRemove = characterData.getEquippedItemName(slotName);
+        String equippedItemNameToRemove = characterData.getEquippedItemName(uniqueIdentifier);
 
         // Find the EquipmentItem to remove based on the equipped item name
         for (EquipmentItem equippedItem : equippedItems) {
@@ -52,7 +55,7 @@ public class EquipmentSlotHandler {
 
         if (equippedItemToRemove != null) {
             equippedItems.remove(equippedItemToRemove);
-            characterData.setEquippedItemName(slotName, null); // Clear the equipped item name
+            characterData.setEquippedItemName(uniqueIdentifier, null); // Clear the equipped item name
 
 
             // Recalculate totalStats after unequipping
@@ -66,7 +69,7 @@ public class EquipmentSlotHandler {
             EquipmentItem selectedEquipment = showEquipmentSelectionDialog(slotName);
             if (selectedEquipment != null) {
                 equippedItems.add(selectedEquipment);
-                characterData.setEquippedItemName(slotName, selectedEquipment.getName()); // Update equipped item name
+                characterData.setEquippedItemName(uniqueIdentifier, selectedEquipment.getName()); // Update equipped item name
 
                 // Recalculate totalStats after equipping
                 characterData.updateTotalStats(equippedItems);
@@ -131,6 +134,10 @@ public class EquipmentSlotHandler {
 
     Button getSlotButton() {
         return slotButton;
+    }
+
+    String getUniqueIdentifier() {
+        return uniqueIdentifier;
     }
 
 

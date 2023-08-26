@@ -41,47 +41,47 @@ public class CharacterTab extends Tab {
         List<EquipmentItem> equippedItems = characterData.getEquippedItems();
         //Helma
         Button equipHelmetButton = new Button("Helma");
-        EquipmentSlotHandler helmaSlotHandler = new EquipmentSlotHandler("Helma", equipHelmetButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler helmaSlotHandler = new EquipmentSlotHandler("helmaSlot","Helma", equipHelmetButton, equippedItems, allItems, characterData, characterTab);
         equipHelmetButton.setLayoutX(500);
         equipHelmetButton.setLayoutY(40);
         //Chestplate
         Button equipChestplateButton = new Button("Hrudní plát");
-        EquipmentSlotHandler chestplateSlotHandler = new EquipmentSlotHandler("Hrudní plát", equipChestplateButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler chestplateSlotHandler = new EquipmentSlotHandler("hrudSlot","Hrudní plát", equipChestplateButton, equippedItems, allItems, characterData, characterTab);
         equipChestplateButton.setLayoutX(500);
         equipChestplateButton.setLayoutY(150);
         //Ruce
         Button equipArmsButton = new Button("Zbroj rukou");
-        EquipmentSlotHandler armsSlotHandler = new EquipmentSlotHandler("Zbroj rukou", equipArmsButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler armsSlotHandler = new EquipmentSlotHandler("ruceSlot","Zbroj rukou", equipArmsButton, equippedItems, allItems, characterData, characterTab);
         equipArmsButton.setLayoutX(500);
         equipArmsButton.setLayoutY(250);
         //Zbroj nohou
         Button equipLeggingsButton = new Button("Zbroj nohou");
-        EquipmentSlotHandler leggingsSlotHandler = new EquipmentSlotHandler("Zbroj nohou", equipLeggingsButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler leggingsSlotHandler = new EquipmentSlotHandler("nohySlot","Zbroj nohou", equipLeggingsButton, equippedItems, allItems, characterData, characterTab);
         equipLeggingsButton.setLayoutX(500);
         equipLeggingsButton.setLayoutY(400);
         //Boty
         Button equipBootsButton = new Button("Boty");
-        EquipmentSlotHandler bootsSlotHandler = new EquipmentSlotHandler("Boty", equipBootsButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler bootsSlotHandler = new EquipmentSlotHandler("botySlot","Boty", equipBootsButton, equippedItems, allItems, characterData, characterTab);
         equipBootsButton.setLayoutX(500);
         equipBootsButton.setLayoutY(500);
         //Prsteny
         Button equipRing1Button = new Button("Prsten");
-        EquipmentSlotHandler ring1SlotHandler = new EquipmentSlotHandler("Prsten", equipRing1Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler ring1SlotHandler = new EquipmentSlotHandler("prsten1Slot","Prsten", equipRing1Button, equippedItems, allItems, characterData, characterTab);
         equipRing1Button.setLayoutX(20);
         equipRing1Button.setLayoutY(80);
 
         Button equipRing2Button = new Button("Prsten");
-        EquipmentSlotHandler ring2SlotHandler = new EquipmentSlotHandler("Prsten", equipRing2Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler ring2SlotHandler = new EquipmentSlotHandler("prsten2Slot","Prsten", equipRing2Button, equippedItems, allItems, characterData, characterTab);
         equipRing2Button.setLayoutX(20);
         equipRing2Button.setLayoutY(120);
 
         Button equipRing3Button = new Button("Prsten");
-        EquipmentSlotHandler ring3SlotHandler = new EquipmentSlotHandler("Prsten", equipRing3Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler ring3SlotHandler = new EquipmentSlotHandler("prsten3Slot","Prsten", equipRing3Button, equippedItems, allItems, characterData, characterTab);
         equipRing3Button.setLayoutX(20);
         equipRing3Button.setLayoutY(160);
 
         Button equipRing4Button = new Button("Prsten");
-        EquipmentSlotHandler ring4SlotHandler = new EquipmentSlotHandler("Prsten", equipRing4Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler ring4SlotHandler = new EquipmentSlotHandler("prsten4Slot","Prsten", equipRing4Button, equippedItems, allItems, characterData, characterTab);
         equipRing4Button.setLayoutX(20);
         equipRing4Button.setLayoutY(200);
 

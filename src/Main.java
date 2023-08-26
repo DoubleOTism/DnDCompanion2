@@ -198,11 +198,12 @@ public class Main extends Application {
             List<EquipmentSlotHandler> slotHandlers = loadedCharacterTab.getSlotHandlers();
             for (EquipmentSlotHandler slotHandler : slotHandlers) {
                 Button slotButton = slotHandler.getSlotButton();
-                String equippedItemName = equippedItemNames.get(slotHandler.getSlotName());
+                String equippedItemName = equippedItemNames.get(slotHandler.getUniqueIdentifier()); // Use uniqueIdentifier
                 slotHandler.updateSlotButtonText(slotButton, equippedItemName);
             }
         }
     }
+
 
 
 
