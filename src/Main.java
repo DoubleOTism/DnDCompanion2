@@ -23,10 +23,11 @@ public class Main extends Application {
     CharacterData characterData;
     private List<CharacterData> characterDataList = new ArrayList<>();
     private List<CharacterTab> characterTabs = new ArrayList<>();
+    BorderPane root = new BorderPane();
+
 
     @Override
     public void start(Stage primaryStage) {
-        BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 1200, 900);
 
         root.setCenter(tabPane);
@@ -86,6 +87,8 @@ public class Main extends Application {
         speechField.setPromptText("Výřečnost");
         TextField accuracyField = new TextField();
         accuracyField.setPromptText("Přesnost");
+        TextField hpField = new TextField();
+        hpField.setPromptText("životy");
 
         List<TextField> customStatNameFields = new ArrayList<>();
         List<TextField> customStatValueFields = new ArrayList<>();
@@ -113,7 +116,7 @@ public class Main extends Application {
                 customStatsVBox.getChildren().add(addCustomStatButton);
             }
         });
-        creationVBox.getChildren().addAll(characterNameField, characterRaceField, useCustomStatsCheckbox, strengthField, defenseField, luckField, intelligenceField, perceptionField, speechField, accuracyField,customStatsVBox, addButton, cancelButton);
+        creationVBox.getChildren().addAll(characterNameField, characterRaceField, useCustomStatsCheckbox, strengthField, defenseField, luckField, intelligenceField, perceptionField, speechField, accuracyField, hpField,customStatsVBox, addButton, cancelButton);
         creationVBox.setSpacing(10);
         creationVBox.setPadding(new Insets(10));
 
@@ -121,6 +124,7 @@ public class Main extends Application {
         addButton.setOnAction(event -> {
             String name = characterNameField.getText();
             String race = characterRaceField.getText();
+            Integer health = Integer.valueOf(hpField.getText());
             Map<String, Integer> baseStats = new HashMap<>();
             baseStats.put("Síla", parseIntOrDefault(strengthField.getText()));
             baseStats.put("Obrana", parseIntOrDefault(defenseField.getText()));
@@ -141,7 +145,7 @@ public class Main extends Application {
             List<EquipmentItem> allItems = new ArrayList<>();
             List<EquipmentItem> equippedItems = new ArrayList<>();
             Map<Button, String> equippedItemNames = new HashMap<>();
-            createNewCharacterTab(name, race, baseStats, customStats, allItems, equippedItems, equippedItemNames);
+            createNewCharacterTab(name, race, health, baseStats, customStats, allItems, equippedItems, equippedItemNames);
             dialog.close();
 
         });
@@ -151,13 +155,14 @@ public class Main extends Application {
         dialog.showAndWait();
     }
 
-    private void createNewCharacterTab(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems,Map<Button, String> equippedItemNames) {
-        CharacterData characterData = new CharacterData(characterName, characterRace, baseStats, customStats, allItems, equippedItems);
+    private void createNewCharacterTab(String characterName, String characterRace, Integer health, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems,Map<Button, String> equippedItemNames) {
+        CharacterData characterData = new CharacterData(characterName, characterRace, health, baseStats, customStats, allItems, equippedItems);
         CharacterTab characterTab = new CharacterTab(characterData);
         characterDataList.add(characterData);
         characterTabs.add(characterTab);
         tabPane.getTabs().add(characterTab);
     }
+
 
 
     private void saveCharacterData(List<CharacterData> characterDataList, String filename) {

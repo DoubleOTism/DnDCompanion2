@@ -21,15 +21,32 @@ public class CharacterData implements Serializable {
 
     private Map<String, String> equippedItemNames = new HashMap<>();
 
+    private Map<String, Integer> statIncreases = new HashMap<>();
+
+    private int xp;
+    private int level;
+    private int requireXP = 100;
+
+    private Integer health;
+
+    private Integer currentHealth;
 
 
-    public CharacterData(String characterName, String characterRace, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems) {
+
+
+
+
+    public CharacterData(String characterName, String characterRace, Integer health, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems) {
         this.characterName = characterName;
         this.characterRace = characterRace;
         this.baseStats = baseStats;
         this.customStats = customStats;
         this.allItems = allItems;
         this.equippedItems = equippedItems;
+        this.xp = 0;
+        this.level = 0;
+        this.health = health;
+        this.currentHealth = health;
         totalStats = new HashMap<>(baseStats);
         customStats.forEach((stat, value) -> totalStats.merge(stat, value, Integer::sum));
 
@@ -62,10 +79,6 @@ public class CharacterData implements Serializable {
     public void addEquippedItem(EquipmentItem item) {
         equippedItems.add(item);
     }
-
-
-
-
     public void setEquippedItemName(String slotName, String itemName) {
         equippedItemNames.put(slotName, itemName);
     }
@@ -79,8 +92,53 @@ public class CharacterData implements Serializable {
     }
 
 
+    //XP
+    public int getXP() {
+        return xp;
+    }
 
+    public int getRequireXP() {
+        return requireXP;
+    }
 
+    public void setXP(int xp) {
+        this.xp = xp;
+        updateLevel();
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void updateLevel() {
+        int requiredXP = requireXP;
+        double levelMultiplier = 1.5; // 150% of previous XP
+        int currentLevel = level; // Start from the current level
+
+        while (xp >= requiredXP) {
+            xp -= requiredXP;
+            requiredXP = (int) (requiredXP * levelMultiplier);
+            currentLevel++;
+        }
+
+        level = currentLevel;
+        this.requireXP = requiredXP;
+    }
+
+    public double getXPProgress() {
+        double progress = (double) xp / requireXP;
+        return Math.min(1.0, progress); // Cap at 1.0 (100%)
+    }
+
+    public void increaseStat(String stat) {
+        if (baseStats.containsKey(stat)) {
+            baseStats.put(stat, baseStats.get(stat) + 1);
+            updateTotalStats(equippedItems);
+        } else if (customStats.containsKey(stat)) {
+            customStats.put(stat, customStats.get(stat) + 1);
+            updateTotalStats(equippedItems);
+        }
+    }
 
     public void addItem(EquipmentItem item) {
         allItems.add(item);
@@ -115,6 +173,32 @@ public class CharacterData implements Serializable {
     public Map<String, Integer> getTotalStats() {
         return totalStats;
     }
+
+
+    public Integer getMaxHP() {
+        return health;
+    }
+
+
+
+    public Integer getCurrentHealth() {
+        return currentHealth;
+    }
+
+    public void modifyCurrentHealth(int amount) {
+        currentHealth += amount;
+        if (currentHealth < 0) {
+            currentHealth = 0;
+        } else if (currentHealth > getMaxHP()) {
+            currentHealth = getMaxHP();
+        }
+    }
+
+    public void modifyHP(Integer amount) {
+        health = getMaxHP() + amount;
+    }
+
+
 
 
 

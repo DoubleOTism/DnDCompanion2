@@ -4,17 +4,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CharacterTab extends Tab {
     private CharacterData characterData;
@@ -24,15 +19,24 @@ public class CharacterTab extends Tab {
 
     private List<EquipmentSlotHandler> slotHandlers = new ArrayList<>();
 
+    ProgressBar xpProgressBar = new ProgressBar();
+
+
+
+
 
     public CharacterTab(CharacterData characterData) {
         this.characterData = characterData;
         this.characterTab = this;
         ImageView characterImageView = createCharacterImageView();
+        BorderPane borderPane = new BorderPane();
+        VBox rootBox = new VBox();
         HBox mainBox = new HBox();
 
         Label characterName = new Label(characterData.getCharacterName());
         Label characterRace = new Label("Rasa: " + characterData.getCharacterRace());
+
+
         characterName.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
         characterRace.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
 
@@ -110,53 +114,140 @@ public class CharacterTab extends Tab {
         VBox leftBox = new VBox();
         Button newArmorButton = new Button("Přidat novou zbroj");
         newArmorButton.setOnAction(event -> showEquipmentDialog());
-        leftBox.getChildren().addAll(imagePane, characterName, characterRace, newArmorButton);
+
+
+        Button addStatButton = new Button("Add Custom Stat");
+        addStatButton.setOnAction(event -> showAddStatDialog());
+        rightBox.getChildren().add(addStatButton);
+
+
+
+        //xp handle
+
+        xpProgressBar.setPrefWidth(200); // Set your preferred width
+        xpProgressBar.setProgress(characterData.getXPProgress());
+        System.out.println(characterData.getXPProgress());
+        Button addXPButton = new Button("Přidat XP");
+        addXPButton.setOnAction(event -> addXP());
+        HBox levelManagement = new HBox(xpProgressBar);
+        VBox bottomVBox = new VBox();
+        HBox bottomBox = new HBox(addStatButton, newArmorButton, addXPButton);
+        bottomVBox.getChildren().addAll(levelManagement, bottomBox);
+        bottomBox.setAlignment(Pos.BOTTOM_CENTER);
+        bottomBox.setSpacing(10);
+        bottomBox.setPrefWidth(1200);
 
 
 
 
 
-
-
-
-
-        /**
-        // Základní staty
-        Label baseStatsLabel = new Label("Základní Staty:");
-        baseStatsLabel.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
-        rightBox.getChildren().add(baseStatsLabel);
-
-        characterData.getBaseStats().forEach((stat, value) -> {
-            Label statLabel = new Label(stat + ": " + value);
-            statLabel.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
-            rightBox.getChildren().add(statLabel);
-        });
-
-        // Vlastní staty
-        Label customStatsLabel = new Label("Vlastní Staty:");
-        customStatsLabel.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
-        rightBox.getChildren().add(customStatsLabel);
-
-        characterData.getCustomStats().forEach((stat, value) -> {
-            Label statLabel = new Label(stat + ": " + value);
-            statLabel.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
-            rightBox.getChildren().add(statLabel);
-        });
-        **/
-
+        leftBox.getChildren().addAll(imagePane, characterName, characterRace);
         updateTotalStatsLabel(characterData.getTotalStats());
         mainBox.getChildren().addAll(leftBox, rightBox);
-
-        setContent(mainBox);
+        borderPane.setCenter(mainBox);
+        borderPane.setBottom(bottomVBox);
+        setContent(borderPane);
 
 
 
 
     }
+
+    private void addXP() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Add XP");
+        dialog.setHeaderText("Enter the amount of XP to add:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            try {
+                int xpToAdd = Integer.parseInt(result.get());
+                int newXp = characterData.getXP() + xpToAdd;
+                if (newXp >= characterData.getRequireXP()) {
+                    showLevelUpDialog();
+                }
+                characterData.setXP(newXp);
+                xpProgressBar.setProgress(characterData.getXPProgress());
+
+                // Check for level-up
+
+
+                System.out.println(characterData.getLevel());
+                System.out.println(characterData.getXP());
+            } catch (NumberFormatException e) {
+                // Handle invalid input (non-integer)
+                System.out.println("Invalid input for XP.");
+            }
+        }
+    }
+
+
+    private void showLevelUpDialog() {
+        Map<String, Integer> totalStats = characterData.getTotalStats();
+        List<EquipmentItem> equipmentItems = characterData.getEquippedItems();
+        Dialog<Pair<String, Integer>> dialog = new Dialog<>();
+        dialog.setTitle("Level Up!");
+        dialog.setHeaderText("Congratulations! You've leveled up!");
+
+        ButtonType increaseStatButtonType = new ButtonType("Increase a Stat", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(increaseStatButtonType, ButtonType.CANCEL);
+
+        ComboBox<String> statComboBox = new ComboBox<>();
+        statComboBox.getItems().addAll(characterData.getTotalStats().keySet());
+
+        TextField hpChangeField = new TextField();
+        hpChangeField.setPromptText("Enter HP change");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.add(new Label("Select Stat:"), 0, 0);
+        grid.add(statComboBox, 1, 0);
+        grid.add(new Label("HP Change:"), 0, 1);
+        grid.add(hpChangeField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == increaseStatButtonType) {
+                String selectedStat = statComboBox.getValue();
+                int hpChange = 0;
+                try {
+                    hpChange = Integer.parseInt(hpChangeField.getText());
+                } catch (NumberFormatException ignored) {
+                }
+                return new Pair<>(selectedStat, hpChange);
+            }
+            return null;
+        });
+
+        Optional<Pair<String, Integer>> result = dialog.showAndWait();
+        result.ifPresent(selectedPair -> {
+            String selectedStat = selectedPair.getKey();
+            int hpChange = selectedPair.getValue();
+
+            characterData.increaseStat(selectedStat);
+            characterData.modifyHP(hpChange);
+
+            updateTotalStatsLabel(totalStats);
+            System.out.println(characterData.getMaxHP());
+        });
+    }
+
+
+
+
+
+
+
+
+
 
     public List<EquipmentSlotHandler> getSlotHandlers() {
         return slotHandlers;
     }
+
+
 
     private void showEquipmentDialog() {
         Stage dialog = new Stage();
@@ -243,18 +334,83 @@ public class CharacterTab extends Tab {
         characterData.addItem(equipmentItem);
     }
 
+    private void showAddStatDialog() {
+        List<EquipmentItem> equippedItems = characterData.getEquippedItems();
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Přidat nový stat");
+
+        Label nameLabel = new Label("Název:");
+        TextField nameTextField = new TextField();
+
+        Label valueLabel = new Label("Hodnota:");
+        TextField valueTextField = new TextField();
+
+        Button addButton = new Button("Přidat");
+        addButton.setOnAction(event -> {
+            String newStatName = nameTextField.getText();
+            int baseValue = Integer.parseInt(valueTextField.getText());
+
+            characterData.getCustomStats().put(newStatName, baseValue);
+            characterData.updateTotalStats(equippedItems);
+            updateTotalStatsLabel(characterData.getTotalStats());
+
+            dialog.close();
+        });
+
+        VBox vbox = new VBox(10);
+        vbox.setAlignment(Pos.CENTER);
+        vbox.getChildren().addAll(nameLabel, nameTextField, valueLabel, valueTextField, addButton);
+
+        Scene dialogScene = new Scene(vbox, 300, 200);
+        dialog.setScene(dialogScene);
+        dialog.showAndWait();
+    }
+
+
+
+
     public void updateTotalStatsLabel(Map<String, Integer> totalStats) {
 
         // Clear existing labels
         rightBox.getChildren().removeIf(node -> node instanceof Label);
+        Label statLabelTop = new Label("Statistiky charakteru (kompletní + základ): ");
+        statLabelTop.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
+        rightBox.getChildren().add(statLabelTop);
+
 
         // Update the labels based on the totalStats map
         totalStats.forEach((stat, value) -> {
-            Label statLabel = new Label(stat + ": " + value);
+            Label statLabel = new Label(formatStatText(stat, value));
             statLabel.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
             rightBox.getChildren().add(statLabel);
         });
     }
+
+    private String formatStatText(String stat, int value) {
+        int baseStatValue = characterData.getBaseStats().getOrDefault(stat, 0);
+        int customStatValue = characterData.getCustomStats().getOrDefault(stat, 0);
+        String statText = stat + ": " + value;
+
+        // Append base stat value in parentheses if available
+        if (baseStatValue != 0 || value == 0) {
+            statText += " [" + baseStatValue + "]";
+        }
+
+        // Append custom stat value in square brackets if available
+        if (customStatValue != 0 || characterData.getCustomStats().containsKey(stat)) {
+            statText += " [" + customStatValue + "]";
+        }
+
+        return statText;
+    }
+
+
+
+
+
+
+
 
     private ImageView createCharacterImageView() {
         Image characterImage = new Image("background.png");
@@ -264,4 +420,7 @@ public class CharacterTab extends Tab {
         imageView.setOpacity(0.5);
         return imageView;
     }
+
+
+
 }
