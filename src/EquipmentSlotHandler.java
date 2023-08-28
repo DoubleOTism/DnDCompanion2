@@ -62,8 +62,13 @@ public class EquipmentSlotHandler {
             characterData.updateTotalStats(equippedItems);
             characterTab.updateTotalStatsLabel(characterData.getTotalStats());
 
+            int hpChange = equippedItemToRemove.getHpChange();
+            characterData.modifyHP(-hpChange);
+            characterData.modifyCurrentHealth(-hpChange);
+
             // Update button text to show the slot name
             updateSlotButtonText(slotButton, slotName);
+            characterTab.updateHPLabel();
         } else {
             // Show equipment selection dialog and handle the selected item
             EquipmentItem selectedEquipment = showEquipmentSelectionDialog(slotName);
@@ -71,12 +76,18 @@ public class EquipmentSlotHandler {
                 equippedItems.add(selectedEquipment);
                 characterData.setEquippedItemName(uniqueIdentifier, selectedEquipment.getName()); // Update equipped item name
 
+                int hpChange = selectedEquipment.getHpChange();
+                characterData.modifyHP(hpChange);
+                characterData.modifyCurrentHealth(hpChange);
+
+
                 // Recalculate totalStats after equipping
                 characterData.updateTotalStats(equippedItems);
                 characterTab.updateTotalStatsLabel(characterData.getTotalStats());
 
                 // Update button text to show the equipped item's name
                 updateSlotButtonText(slotButton, selectedEquipment.getName());
+                characterTab.updateHPLabel();
             }
         }
     }

@@ -91,6 +91,15 @@ public class CharacterData implements Serializable {
         return equippedItemNames;
     }
 
+    public EquipmentItem findItemByName(String itemName) {
+        for (EquipmentItem equipmentItem : allItems) {
+            if (equipmentItem.getName().equals(itemName)) {
+                return equipmentItem;
+            }
+        }
+        return null; // Item not found
+    }
+
 
     //XP
     public int getXP() {
@@ -196,6 +205,10 @@ public class CharacterData implements Serializable {
 
     public void modifyHP(Integer amount) {
         health = getMaxHP() + amount;
+    }
+
+    public List<EquipmentItem> getAllItems() {
+        return allItems;
     }
 
 
