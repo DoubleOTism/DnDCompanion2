@@ -15,17 +15,13 @@ import java.util.Map;
 
 public class Main extends Application {
     private TabPane tabPane = new TabPane();
-
     public static void main(String[] args) {
         launch(args);
     }
-
     CharacterData characterData;
     private List<CharacterData> characterDataList = new ArrayList<>();
     private List<CharacterTab> characterTabs = new ArrayList<>();
     BorderPane root = new BorderPane();
-
-
     @Override
     public void start(Stage primaryStage) {
         Scene scene = new Scene(root, 1200, 900);
@@ -40,7 +36,6 @@ public class Main extends Application {
         root.setBackground(new Background(new BackgroundFill(Color.rgb(40, 40, 40), CornerRadii.EMPTY, Insets.EMPTY)));
         primaryStage.show();
     }
-
     private MenuBar createMenuBar() {
         MenuBar menuBar = new MenuBar();
 
@@ -57,7 +52,6 @@ public class Main extends Application {
         menuBar.getMenus().add(startMenu);
         return menuBar;
     }
-
     private void showNewCharacterDialog() {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -154,7 +148,6 @@ public class Main extends Application {
         dialog.setScene(dialogScene);
         dialog.showAndWait();
     }
-
     private void createNewCharacterTab(String characterName, String characterRace, Integer health, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems,Map<Button, String> equippedItemNames) {
         CharacterData characterData = new CharacterData(characterName, characterRace, health, baseStats, customStats, allItems, equippedItems);
         CharacterTab characterTab = new CharacterTab(characterData);
@@ -162,9 +155,6 @@ public class Main extends Application {
         characterTabs.add(characterTab);
         tabPane.getTabs().add(characterTab);
     }
-
-
-
     private void saveCharacterData(List<CharacterData> characterDataList, String filename) {
         try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filename))) {
             outputStream.writeObject(characterDataList);
@@ -173,7 +163,6 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
-
     private int parseIntOrDefault(String value) {
         try {
             return Integer.parseInt(value);
@@ -181,7 +170,6 @@ public class Main extends Application {
             return 0;
         }
     }
-
     private void loadCharacterData(String filename) {
         List<CharacterData> loadedCharacterDataList;
         try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filename))) {
@@ -208,11 +196,4 @@ public class Main extends Application {
             }
         }
     }
-
-
-
-
-
-
-
 }

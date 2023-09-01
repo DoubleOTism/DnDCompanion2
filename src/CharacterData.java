@@ -30,6 +30,7 @@ public class CharacterData implements Serializable {
     private Integer health;
 
     private Integer currentHealth;
+    private static final int MIN_CARRY_WEIGHT = 5;
 
 
 
@@ -164,8 +165,7 @@ public class CharacterData implements Serializable {
         for (EquipmentItem equippedItem : equippedItems) {
             Map<String, Integer> itemStats = equippedItem.getModifiedStats();
             for (Map.Entry<String, Integer> statEntry : itemStats.entrySet()) {
-                System.out.println(statEntry.getKey());
-                System.out.println(statEntry.getValue());
+
                 String statName = statEntry.getKey();
                 int statChange = statEntry.getValue();
 
@@ -176,7 +176,6 @@ public class CharacterData implements Serializable {
                 }
             }
         }
-        System.out.println(totalStats);
     }
 
     public Map<String, Integer> getTotalStats() {
@@ -202,25 +201,47 @@ public class CharacterData implements Serializable {
             currentHealth = getMaxHP();
         }
     }
-
     public void modifyHP(Integer amount) {
         health = getMaxHP() + amount;
     }
-
     public List<EquipmentItem> getAllItems() {
         return allItems;
     }
+    public float calculateCarryWeight() {
+        int silaStat = baseStats.get("Síla");
+        int carryWeight;
+        if (silaStat < 0) {
+            carryWeight = 20 + silaStat * 5;
+            carryWeight = Math.max(carryWeight, 5);
+        } else {
+            carryWeight = 20 + silaStat * 10;
+        }
+        return Math.max(carryWeight, MIN_CARRY_WEIGHT);
+    }
 
+    public float calculateCurrentWeight() {
+        float maxCarryWeight = calculateCarryWeight();
+        float totalWeight = 0;
+        for (EquipmentItem item : allItems) {
+            totalWeight += item.getWeight();
+        }
+        float currentCW = maxCarryWeight-totalWeight;
 
+        return totalWeight;
+    }
 
+    public float calculateAvailableWeight() {
+        float maxCarry = calculateCarryWeight();
+        float currentCarry = calculateCurrentWeight();
+        float availableWeight = maxCarry - currentCarry;
 
+        return availableWeight;
+    }
 
-
-
-
-
-
-
-
-
+    public double getWeightRatio() {
+        double maxCarryWeight = calculateCarryWeight();
+        double currentWeight = calculateCurrentWeight();
+        double progress = currentWeight / maxCarryWeight;
+        return Math.min(1.0, progress); // Cap at 1.0 (100%)
+    }
 }

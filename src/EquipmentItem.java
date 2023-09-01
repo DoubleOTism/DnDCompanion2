@@ -7,41 +7,31 @@ public class EquipmentItem implements Serializable {
     private String name;
     private Map<String, Integer> modifiedStats;
     private int hpChange;
-    private int weight;
+    private float weight;
     private String selectedSlot;
-
-    public EquipmentItem(String name,String selectedSlot, Map<String, Integer> modifiedStats, int hpChange, int weight) {
+    public EquipmentItem(String name,String selectedSlot, Map<String, Integer> modifiedStats, int hpChange, float weight) {
         this.name = name;
         this.selectedSlot = selectedSlot;
         this.modifiedStats = modifiedStats;
         this.hpChange = hpChange;
         this.weight = weight;
     }
-
     // Getters and setters for all fields
-
     public String getName() {
         return name;
     }
-
     public Map<String, Integer> getModifiedStats() {
         return modifiedStats;
     }
-
     public int getHpChange() {
         return hpChange;
     }
-
-    public int getWeight() {
+    public float getWeight() {
         return weight;
     }
-
     public String getEquipSlots() {
         return selectedSlot;
     }
-
-
-
     @Override
     public String toString() {
         return name;

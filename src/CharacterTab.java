@@ -11,22 +11,20 @@ import javafx.util.Pair;
 
 import java.util.*;
 
+import static java.lang.Float.parseFloat;
+
 public class CharacterTab extends Tab {
     private CharacterData characterData;
     private CharacterTab characterTab;
     private VBox rightBox = new VBox();
     private List<EquipmentSlotHandler> slotHandlers = new ArrayList<>();
     ProgressBar xpProgressBar = new ProgressBar();
+    ProgressBar carryProgressBar = new ProgressBar();
     Label xpInfoLabel = new Label();
     Label hpLabel = new Label();
-
     VBox statsVBox = new VBox();
     ListView<String> itemsListView = new ListView<>();
-
-
-
-
-
+    private Label carryWeightLabel = new Label();
 
     public CharacterTab(CharacterData characterData) {
         this.characterData = characterData;
@@ -34,14 +32,10 @@ public class CharacterTab extends Tab {
         ImageView characterImageView = createCharacterImageView();
         BorderPane borderPane = new BorderPane();
         HBox mainBox = new HBox();
-
         Label characterName = new Label(characterData.getCharacterName());
         Label characterRace = new Label("Rasa: " + characterData.getCharacterRace());
-
-
         characterName.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
         characterRace.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
-
     //Tlačítka pro výbavu
         List<EquipmentItem> allItems = characterData.getInventory();
         List<EquipmentItem> equippedItems = characterData.getEquippedItems();
@@ -91,6 +85,16 @@ public class CharacterTab extends Tab {
         equipRing4Button.setLayoutX(20);
         equipRing4Button.setLayoutY(200);
 
+        Button equipNecklace1Button = new Button("Náhrdelník");
+        EquipmentSlotHandler necklace1SlotHandler = new EquipmentSlotHandler("nahrdelnik1Slot","Náhrdelník", equipNecklace1Button, equippedItems, allItems, characterData, characterTab);
+        equipNecklace1Button.setLayoutX(20);
+        equipNecklace1Button.setLayoutY(300);
+
+        Button equipNecklace2Button = new Button("Náhrdelník");
+        EquipmentSlotHandler necklace2SlotHandler = new EquipmentSlotHandler("nahrdelnik2Slot","Náhrdelník", equipNecklace2Button, equippedItems, allItems, characterData, characterTab);
+        equipNecklace2Button.setLayoutX(20);
+        equipNecklace2Button.setLayoutY(340);
+
         slotHandlers.add(helmaSlotHandler);
         slotHandlers.add(chestplateSlotHandler);
         slotHandlers.add(armsSlotHandler);
@@ -100,11 +104,13 @@ public class CharacterTab extends Tab {
         slotHandlers.add(ring2SlotHandler);
         slotHandlers.add(ring3SlotHandler);
         slotHandlers.add(ring4SlotHandler);
+        slotHandlers.add(necklace1SlotHandler);
+        slotHandlers.add(necklace2SlotHandler);
 
 
 
         Pane buttonOverlayPane = new Pane();
-        buttonOverlayPane.getChildren().addAll(equipHelmetButton, equipChestplateButton, equipArmsButton, equipLeggingsButton, equipBootsButton, equipRing1Button, equipRing2Button, equipRing3Button, equipRing4Button);
+        buttonOverlayPane.getChildren().addAll(equipHelmetButton, equipChestplateButton, equipArmsButton, equipLeggingsButton, equipBootsButton, equipRing1Button, equipRing2Button, equipRing3Button, equipRing4Button, equipNecklace1Button, equipNecklace2Button);
 
         StackPane imagePane = new StackPane(characterImageView, buttonOverlayPane);
 
@@ -121,6 +127,9 @@ public class CharacterTab extends Tab {
         Button addStatButton = new Button("Přidat vlastní stat");
         addStatButton.setOnAction(event -> showAddStatDialog());
 
+        Button addNewItem = new Button("Přidat předmět");
+        addNewItem.setOnAction(event -> createNewItemDialog());
+
 
 
 
@@ -128,37 +137,57 @@ public class CharacterTab extends Tab {
 
         xpProgressBar.setPrefWidth(200); // Set your preferred width
         xpProgressBar.setProgress(characterData.getXPProgress());
-        System.out.println(characterData.getXPProgress());
+        carryProgressBar.setPrefWidth(200);
+        carryProgressBar.setProgress(characterData.getWeightRatio());
         Button addXPButton = new Button("Přidat XP");
         addXPButton.setOnAction(event -> addXP());
 
 
-
+        updateCarryWeightLabel();
         updateItemsListView();
         updateHPLabel();
         hpLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+        carryWeightLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
         updateXPLabel();
         Region spacer = new Region();
         spacer.setMinWidth(200);
-        HBox levelManagement = new HBox(xpProgressBar, xpInfoLabel, spacer, hpLabel);
+        Region spacr = new Region();
+        spacr.setMinWidth(200);
+        Region spacer4 = new Region();
+        spacer4.setMinWidth(50);
+        carryProgressBar.setStyle("-fx-accent: red;");
+        HBox levelManagement = new HBox(spacer4, xpProgressBar, xpInfoLabel, spacer, hpLabel, spacr, carryWeightLabel, carryProgressBar);
         VBox bottomVBox = new VBox();
         Button modifyHP = new Button("Upravit HP");
         modifyHP.setOnAction(event -> showModifyHPDialog());
-        HBox bottomBox = new HBox(addStatButton, newArmorButton, addXPButton, modifyHP);
+        Region spacer5 = new Region();
+        spacer5.setMinWidth(400);
+        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addXPButton, modifyHP);
         bottomVBox.getChildren().addAll(bottomBox, levelManagement);
-        bottomBox.setAlignment(Pos.BOTTOM_CENTER);
         bottomBox.setSpacing(10);
-        bottomBox.setPrefWidth(1200);
 
 
 
 
         leftBox.getChildren().addAll(imagePane, characterName, characterRace);
         updateTotalStatsLabel(characterData.getTotalStats());
-        mainBox.getChildren().addAll(leftBox, rightBox);
-        rightBox.getChildren().addAll(statsVBox, itemsListView);
+        Region spacer3 = new Region();
+        spacer3.setMinWidth(100);
+        mainBox.getChildren().addAll(leftBox, spacer3, rightBox);
+        Region spacer2 = new Region();
+        spacer2.setMinHeight(20);
+        ScrollPane scrollPane = new ScrollPane(statsVBox);
+        scrollPane.setPrefHeight(400);
+        scrollPane.setMaxWidth(480);
+        scrollPane.setFitToWidth(true);
+        Region spacer6 = new Region();
+        spacer6.setMinHeight(20);
+        scrollPane.setStyle("-fx-background: rgb(40, 40, 40); -fx-border-color: rgb(40, 40, 40);");
+        rightBox.getChildren().addAll(spacer6, scrollPane, spacer2, itemsListView);
+        itemsListView.setMaxWidth(480);
+        itemsListView.setMaxHeight(350);
         rightBox.setMinWidth(600);
-        leftBox.setMinWidth(600);
+        rightBox.setMaxHeight(600);
         borderPane.setCenter(mainBox);
         borderPane.setBottom(bottomVBox);
         setContent(borderPane);
@@ -167,6 +196,77 @@ public class CharacterTab extends Tab {
 
 
     }
+
+    public void createNewItemDialog() {
+        Dialog<String[]> itemCreationDialog = new Dialog<>();
+        itemCreationDialog.setTitle("Vytvořit předmět");
+        itemCreationDialog.setHeaderText("Zadej info o předmětu");
+
+        // Set the dialog's content
+        VBox content = new VBox();
+        TextField itemNameField = new TextField();
+        TextField carryWeightField = new TextField();
+        content.getChildren().addAll(
+                new Label("Název:"),
+                itemNameField,
+                new Label("Váha:"),
+                carryWeightField
+        );
+        itemCreationDialog.getDialogPane().setContent(content);
+
+        // Add buttons to the dialog
+        ButtonType createButtonType = new ButtonType("Vytvořit", ButtonBar.ButtonData.OK_DONE);
+        itemCreationDialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+
+        // Convert the input to an array and close the dialog
+        itemCreationDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == createButtonType) {
+                String itemName = itemNameField.getText().trim();
+                String carryWeightStr = carryWeightField.getText().trim();
+
+                if (itemName.isEmpty() || carryWeightStr.isEmpty()) {
+                    showMissingInputError();
+                    return null;
+                }
+
+                return new String[] { itemName, carryWeightStr };
+            }
+            return null;
+        });
+
+        // Show the dialog and handle the result
+        Optional<String[]> result = itemCreationDialog.showAndWait();
+        result.ifPresent(itemData -> {
+            String itemName = itemData[0];
+            float carryWeight = parseFloat(itemData[1]);
+            float capacity = characterData.calculateAvailableWeight();
+            if (carryWeight > capacity) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Nelze přidat");
+                alert.setHeaderText("Nelze vytvořit předmět");
+                alert.setContentText("Tenhle předmět nelze v tuto chvíli uložit do inventáře, překročil by jsi tak svůj limit pro nostnost.");
+                alert.showAndWait();
+            } else {
+
+                // Create the EquipmentItem instance and add it to allItems
+                EquipmentItem newItem = new EquipmentItem(itemName, null, null, 0, carryWeight);
+                characterData.getAllItems().add(newItem);
+
+                // Update the items list view or perform other necessary updates
+                updateItemsListView();
+                updateCarryWeightLabel();
+            }
+        });
+    }
+
+    private void showMissingInputError() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Chybějící údaje");
+        alert.setHeaderText("Vyplň všechny údaje");
+        alert.setContentText("Prosím, vyplň všechny pole.");
+        alert.showAndWait();
+    }
+
 
     public void updateItemsListView() {
         itemsListView.getItems().clear();
@@ -183,7 +283,7 @@ public class CharacterTab extends Tab {
                 }
 
                 Map<String, Integer> itemStats = equipmentItem.getModifiedStats();
-                if (!itemStats.isEmpty()) {
+                if (itemStats != null && !itemStats.isEmpty()) {
                     StringBuilder statsBuilder = new StringBuilder("\nStaty- ");
                     boolean firstStat = true;
                     for (Map.Entry<String, Integer> statEntry : itemStats.entrySet()) {
@@ -196,6 +296,7 @@ public class CharacterTab extends Tab {
                     itemInfo += statsBuilder.toString();
                 }
 
+
                 itemsListView.getItems().add(itemInfo);
             }
         }
@@ -205,7 +306,7 @@ public class CharacterTab extends Tab {
             if (itemNameSelect != null) {
                 String itemName = itemNameSelect.split(" \\(")[0]; // Extract item name before stats
                 EquipmentItem selectedItem = characterData.findItemByName(itemName);
-                if (itemName != null) {
+                if (selectedItem != null) {
                     // Create a dialog to display detailed item information and removal button
                     Dialog<String> itemDialog = new Dialog<>();
                     itemDialog.setTitle("Detaily předmětu: " + itemName);
@@ -229,7 +330,7 @@ public class CharacterTab extends Tab {
 
                     // Display item stats if available
                     Map<String, Integer> itemStats = selectedItem.getModifiedStats();
-                    if (!itemStats.isEmpty()) {
+                    if (itemStats != null && !itemStats.isEmpty()) {
                         Label statsLabel = new Label("Staty: \n" );
                         StringBuilder statsBuilder = new StringBuilder();
                         for (Map.Entry<String, Integer> statEntry : itemStats.entrySet()) {
@@ -253,6 +354,7 @@ public class CharacterTab extends Tab {
                         } else {
                             characterData.getAllItems().remove(selectedItem);
                             updateItemsListView(); // Update the ListView after removing the item
+                            updateCarryWeightLabel();
                             itemDialog.close(); // Close the dialog
                         }
                     });
@@ -265,16 +367,11 @@ public class CharacterTab extends Tab {
                 }
             }
         });
-
-
-
     }
-
-
     private void addXP() {
         TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Add XP");
-        dialog.setHeaderText("Enter the amount of XP to add:");
+        dialog.setTitle("Přidání XP");
+        dialog.setHeaderText("Kolik XP charakter získá?:");
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
@@ -288,13 +385,9 @@ public class CharacterTab extends Tab {
                 xpProgressBar.setProgress(characterData.getXPProgress());
                 updateXPLabel();
             } catch (NumberFormatException e) {
-                // Handle invalid input (non-integer)
-                System.out.println("Invalid input for XP.");
             }
         }
     }
-
-
     private void showLevelUpDialog() {
         Map<String, Integer> totalStats = characterData.getTotalStats();
         List<EquipmentItem> equipmentItems = characterData.getEquippedItems();
@@ -345,31 +438,19 @@ public class CharacterTab extends Tab {
 
             updateTotalStatsLabel(totalStats);
             updateItemsListView();
-            System.out.println(characterData.getMaxHP());
+            updateCarryWeightLabel();
         });
     }
-
-
-
-
-
-
-
-
-
-
     public List<EquipmentSlotHandler> getSlotHandlers() {
         return slotHandlers;
     }
-
-
-
     private void showEquipmentDialog() {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setTitle("Nová Výbava");
+        dialog.setTitle("Nová výbava");
 
         VBox creationVBox = new VBox();
+        HBox creationHBox = new HBox();
         TextField itemNameField = new TextField();
         itemNameField.setPromptText("Název předmětu");
 
@@ -398,105 +479,145 @@ public class CharacterTab extends Tab {
             newStatChangeTextField.setPromptText("Změna statistiky");
             newStatChangeField.getChildren().addAll(newStatComboBox, newStatChangeTextField);
             statChangeFields.add(newStatChangeField);
-            creationVBox.getChildren().add(creationVBox.getChildren().size() - 2, newStatChangeField); // Add before the last two buttons
-        });
+            creationVBox.getChildren().add(creationVBox.getChildren().size() - 3, newStatChangeField);
 
+            double preferredHeight = creationVBox.getChildren().stream()
+                    .mapToDouble(node -> node.getBoundsInParent().getMaxY())
+                    .max()
+                    .orElse(0.0) + 80;
+            dialog.setHeight(preferredHeight);
+        });
         TextField hpChangeField = new TextField();
         hpChangeField.setPromptText("Změna životů");
-
         TextField weightField = new TextField();
         weightField.setPromptText("Váha předmětu");
         Button addButton = new Button("Přidat");
         Button cancelButton = new Button("Zrušit");
-
         addButton.setOnAction(event -> {
-            String itemName = itemNameField.getText();
-            String selectedSlot = slotComboBox.getValue();
-            int hpChange = Integer.parseInt(hpChangeField.getText());
-            int weight = Integer.parseInt(weightField.getText());
-
-            Map<String, Integer> modifiedStats = new HashMap<>();
-            for (HBox statChangeField : statChangeFields) {
-                ComboBox<String> statChangeComboBox = (ComboBox<String>) statChangeField.getChildren().get(0);
-                TextField statChangeTextField = (TextField) statChangeField.getChildren().get(1);
-                String selectedStat = statChangeComboBox.getValue();
-                int statChange = Integer.parseInt(statChangeTextField.getText());
-                modifiedStats.put(selectedStat, statChange);
+            String itemNameText = itemNameField.getText();
+            String selectedSlotText = slotComboBox.getValue();
+            String hpChangeText = hpChangeField.getText();
+            String weightText = weightField.getText();
+            if (itemNameText.isEmpty() || selectedSlotText == null || hpChangeText.isEmpty() || weightText.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Chybějící údaje");
+                alert.setHeaderText("Nelze vytvořit předmět");
+                alert.setContentText("Všechny povinné údaje (název, slot, změna životů, váha) musí být vyplněny.");
+                alert.showAndWait();
+                return;
             }
 
-            createNewEquipmentItem(itemName, selectedSlot, modifiedStats, hpChange, weight);
-            updateItemsListView();
-            dialog.close();
-        });
+            if (parseFloat(weightField.getText()) > characterData.calculateAvailableWeight()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Nelze přidat");
+                alert.setHeaderText("Nelze vytvořit předmět");
+                alert.setContentText("Tenhle předmět nelze v tuto chvíli uložit do inventáře, překročil by jsi tak svůj limit pro nostnost.");
+                alert.showAndWait();
+            } else {
+                String itemName = itemNameField.getText();
+                String selectedSlot = slotComboBox.getValue();
+                int hpChange = Integer.parseInt(hpChangeField.getText());
+                float weight = parseFloat(weightField.getText());
 
+                Map<String, Integer> modifiedStats = new HashMap<>();
+                for (HBox statChangeField : statChangeFields) {
+                    ComboBox<String> statChangeComboBox = (ComboBox<String>) statChangeField.getChildren().get(0);
+                    TextField statChangeTextField = (TextField) statChangeField.getChildren().get(1);
+                    String selectedStat = statChangeComboBox.getValue();
+                    int statChange = Integer.parseInt(statChangeTextField.getText());
+                    modifiedStats.put(selectedStat, statChange);
+                }
+                createNewEquipmentItem(itemName, selectedSlot, modifiedStats, hpChange, weight);
+                updateItemsListView();
+                updateCarryWeightLabel();
+                dialog.close();
+            }
+        });
         cancelButton.setOnAction(event -> dialog.close());
+        creationHBox.getChildren().addAll(addButton, cancelButton);
+        creationHBox.setSpacing(10);
 
         creationVBox.getChildren().addAll(
-                itemNameField, slotComboBox, addStatChangeButton, hpChangeField, weightField, addButton, cancelButton
-        );
+                itemNameField, slotComboBox, addStatChangeButton, hpChangeField, weightField, creationHBox);
+
         creationVBox.setSpacing(10);
         creationVBox.setPadding(new Insets(10));
-
-        Scene dialogScene = new Scene(creationVBox, 300, 300);
+        Scene dialogScene = new Scene(creationVBox);
+        dialog.setWidth(400);
         dialog.setScene(dialogScene);
         dialog.showAndWait();
     }
-
-
     private void createNewEquipmentItem(
-            String itemName, String selectedSlot, Map<String, Integer> modifiedStats, int hpChange, int weight
+            String itemName, String selectedSlot, Map<String, Integer> modifiedStats, int hpChange, float weight
     ) {
         EquipmentItem equipmentItem = new EquipmentItem(itemName, selectedSlot, modifiedStats, hpChange, weight);
         characterData.addItem(equipmentItem);
     }
-
     private void showAddStatDialog() {
         List<EquipmentItem> equippedItems = characterData.getEquippedItems();
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
+        Dialog<String[]> dialog = new Dialog<>();
         dialog.setTitle("Přidat nový stat");
+        dialog.setHeaderText(null);
 
-        Label nameLabel = new Label("Název:");
+        // Set the dialog's content
+        VBox content = new VBox(10);
         TextField nameTextField = new TextField();
-
-        Label valueLabel = new Label("Hodnota:");
         TextField valueTextField = new TextField();
+        content.getChildren().addAll(
+                new Label("Název:"),
+                nameTextField,
+                new Label("Hodnota:"),
+                valueTextField
+        );
+        dialog.getDialogPane().setContent(content);
 
-        Button addButton = new Button("Přidat");
-        addButton.setOnAction(event -> {
-            String newStatName = nameTextField.getText();
-            int baseValue = Integer.parseInt(valueTextField.getText());
+        // Add buttons to the dialog
+        ButtonType addButtonType = new ButtonType("Přidat", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
-            characterData.getCustomStats().put(newStatName, baseValue);
-            characterData.updateTotalStats(equippedItems);
-            updateTotalStatsLabel(characterData.getTotalStats());
-
-            dialog.close();
+        // Convert the input to an array and close the dialog
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                return new String[] { nameTextField.getText().trim(), valueTextField.getText().trim() };
+            }
+            return null;
         });
 
-        VBox vbox = new VBox(10);
-        vbox.setAlignment(Pos.CENTER);
-        vbox.getChildren().addAll(nameLabel, nameTextField, valueLabel, valueTextField, addButton);
+        // Show the dialog and handle the result
+        Optional<String[]> result = dialog.showAndWait();
+        result.ifPresent(statData -> {
+            String newStatName = statData[0];
+            String baseValueText = statData[1];
 
-        Scene dialogScene = new Scene(vbox, 300, 200);
-        dialog.setScene(dialogScene);
-        dialog.showAndWait();
+            if (!newStatName.isEmpty() && !baseValueText.isEmpty()) {
+                int baseValue = Integer.parseInt(baseValueText);
+                characterData.getCustomStats().put(newStatName, baseValue);
+                characterData.updateTotalStats(equippedItems);
+                updateTotalStatsLabel(characterData.getTotalStats());
+            }
+        });
     }
 
 
     private void showModifyHPDialog() {
         Dialog<Integer> dialog = new Dialog<>();
-        dialog.setTitle("Modify HP");
-        dialog.setHeaderText("Enter the amount to modify HP:");
+        dialog.setTitle("Změna v životech");
+        dialog.setHeaderText("O kolik chceš změnit životy charakteru " + characterData.getCharacterName() + "?");
 
-        ButtonType confirmButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
+        // Set the dialog's content
+        VBox content = new VBox();
+        TextField hpChangeField = new TextField();
+        hpChangeField.setPromptText("Změna v životech");
+        content.getChildren().addAll(
+                hpChangeField
+        );
+        dialog.getDialogPane().setContent(content);
+
+        // Add buttons to the dialog
+        ButtonType confirmButtonType = new ButtonType("Potvrdit", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(confirmButtonType, ButtonType.CANCEL);
 
-        TextField hpChangeField = new TextField();
-        hpChangeField.setPromptText("Enter HP change");
-
-        dialog.getDialogPane().setContent(hpChangeField);
-
+        // Convert the input to an Integer and close the dialog
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
                 try {
@@ -508,6 +629,7 @@ public class CharacterTab extends Tab {
             return null;
         });
 
+        // Show the dialog and handle the result
         Optional<Integer> result = dialog.showAndWait();
         result.ifPresent(hpChange -> {
             characterData.modifyCurrentHealth(hpChange);
@@ -518,23 +640,14 @@ public class CharacterTab extends Tab {
     public void updateHPLabel() {
         Integer currentHP = characterData.getCurrentHealth();
         Integer maxHP = characterData.getMaxHP();
-        System.out.println(currentHP);
-        System.out.println(maxHP);
         hpLabel.setText("HP: " + currentHP + "/" + maxHP);
     }
-
-
-
-
     public void updateTotalStatsLabel(Map<String, Integer> totalStats) {
-
         // Clear existing labels
         statsVBox.getChildren().removeIf(node -> node instanceof Label);
         Label statLabelTop = new Label("Statistiky charakteru (kompletní + základ): ");
         statLabelTop.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
         statsVBox.getChildren().add(statLabelTop);
-
-
         // Update the labels based on the totalStats map
         totalStats.forEach((stat, value) -> {
             Label statLabel = new Label(formatStatText(stat, value));
@@ -542,7 +655,6 @@ public class CharacterTab extends Tab {
             statsVBox.getChildren().add(statLabel);
         });
     }
-
     private String formatStatText(String stat, int value) {
         int baseStatValue = characterData.getBaseStats().getOrDefault(stat, 0);
         int customStatValue = characterData.getCustomStats().getOrDefault(stat, 0);
@@ -552,28 +664,17 @@ public class CharacterTab extends Tab {
         if (baseStatValue != 0 || value == 0) {
             statText += " [" + baseStatValue + "]";
         }
-
         // Append custom stat value in square brackets if available
         if (customStatValue != 0 || characterData.getCustomStats().containsKey(stat)) {
             statText += " [" + customStatValue + "]";
         }
-
         return statText;
     }
-
     private void updateXPLabel() {
         xpInfoLabel.setText("XP: " + characterData.getXP() + " / " + characterData.getRequireXP()
                 + " | Level: " + characterData.getLevel());
         xpInfoLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
     }
-
-
-
-
-
-
-
-
     private ImageView createCharacterImageView() {
         Image characterImage = new Image("background.png");
         ImageView imageView = new ImageView(characterImage);
@@ -582,6 +683,13 @@ public class CharacterTab extends Tab {
         imageView.setOpacity(0.5);
         return imageView;
     }
+
+    public void updateCarryWeightLabel() {
+        carryWeightLabel.setText("Nosnost: " + characterData.calculateCurrentWeight() + "/" + characterData.calculateCarryWeight());
+        carryProgressBar.setProgress(characterData.getWeightRatio());
+    }
+
+
 
 
 

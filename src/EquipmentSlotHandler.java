@@ -15,14 +15,10 @@ public class EquipmentSlotHandler {
     private String slotName;
     private Button slotButton;
     private List<EquipmentItem> equippedItems;
-
     private List<EquipmentItem> allItems;
-
     private CharacterData characterData;
     private CharacterTab characterTab;
-
     private String uniqueIdentifier;
-
     public EquipmentSlotHandler(String uniqueIdentifier, String slotName, Button slotButton, List<EquipmentItem> equippedItems, List<EquipmentItem> allItems, CharacterData characterData, CharacterTab characterTab) {
         this.uniqueIdentifier = uniqueIdentifier;
         this.slotName = slotName;
@@ -34,13 +30,9 @@ public class EquipmentSlotHandler {
         updateSlotButtonText(slotButton, characterData.getEquippedItemName(slotName));
         slotButton.setOnAction(event -> handleButtonClick());
     }
-
-
     String getSlotName() {
         return slotName;
     }
-
-
     private void handleButtonClick() {
         EquipmentItem equippedItemToRemove = null;
         String equippedItemNameToRemove = characterData.getEquippedItemName(uniqueIdentifier);
@@ -91,18 +83,6 @@ public class EquipmentSlotHandler {
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
     private EquipmentItem showEquipmentSelectionDialog(String slotName) {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -142,16 +122,12 @@ public class EquipmentSlotHandler {
         }
         return null;
     }
-
     Button getSlotButton() {
         return slotButton;
     }
-
     String getUniqueIdentifier() {
         return uniqueIdentifier;
     }
-
-
     private void unequipMultiSlotItems(Button slotButton) {
         String itemNameToRemove = slotButton.getText();
 
@@ -173,21 +149,6 @@ public class EquipmentSlotHandler {
             characterTab.updateTotalStatsLabel(characterData.getTotalStats());
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     private boolean isItemEquipped(EquipmentItem equipmentItem) {
         return equippedItems.contains(equipmentItem);
     }
@@ -199,5 +160,4 @@ public class EquipmentSlotHandler {
             buttonToBeUpdated.setText(text);
         }
     }
-
 }
