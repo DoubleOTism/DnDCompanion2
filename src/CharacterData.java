@@ -208,7 +208,7 @@ public class CharacterData implements Serializable {
         return allItems;
     }
     public float calculateCarryWeight() {
-        int silaStat = baseStats.get("Síla");
+        int silaStat = totalStats.get("Síla");
         int carryWeight;
         if (silaStat < 0) {
             carryWeight = 20 + silaStat * 5;

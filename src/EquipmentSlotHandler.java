@@ -41,6 +41,7 @@ public class EquipmentSlotHandler {
         for (EquipmentItem equippedItem : equippedItems) {
             if (equippedItem.getName().equals(equippedItemNameToRemove)) {
                 equippedItemToRemove = equippedItem;
+                characterTab.updateCarryWeightLabel();
                 break;
             }
         }
@@ -61,6 +62,8 @@ public class EquipmentSlotHandler {
             // Update button text to show the slot name
             updateSlotButtonText(slotButton, slotName);
             characterTab.updateHPLabel();
+            characterTab.updateCarryWeightLabel();
+
         } else {
             // Show equipment selection dialog and handle the selected item
             EquipmentItem selectedEquipment = showEquipmentSelectionDialog(slotName);
@@ -80,6 +83,8 @@ public class EquipmentSlotHandler {
                 // Update button text to show the equipped item's name
                 updateSlotButtonText(slotButton, selectedEquipment.getName());
                 characterTab.updateHPLabel();
+                characterTab.updateCarryWeightLabel();
+
             }
         }
     }
