@@ -1,5 +1,4 @@
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -10,6 +9,7 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Float.parseFloat;
 
@@ -130,6 +130,9 @@ public class CharacterTab extends Tab {
         Button addNewItem = new Button("Přidat předmět");
         addNewItem.setOnAction(event -> createNewItemDialog());
 
+        Button addWeaponButton = new Button("Přidat novou zbraň");
+        addWeaponButton.setOnAction(event -> showWeaponDialog());
+
 
 
 
@@ -162,7 +165,7 @@ public class CharacterTab extends Tab {
         modifyHP.setOnAction(event -> showModifyHPDialog());
         Region spacer5 = new Region();
         spacer5.setMinWidth(400);
-        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addXPButton, modifyHP);
+        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addWeaponButton,addXPButton, modifyHP);
         bottomVBox.getChildren().addAll(bottomBox, levelManagement);
         bottomBox.setSpacing(10);
 
@@ -196,6 +199,8 @@ public class CharacterTab extends Tab {
 
 
     }
+
+
 
     public void createNewItemDialog() {
         Dialog<String[]> itemCreationDialog = new Dialog<>();
@@ -249,7 +254,7 @@ public class CharacterTab extends Tab {
             } else {
 
                 // Create the EquipmentItem instance and add it to allItems
-                EquipmentItem newItem = new EquipmentItem(itemName, null, null, 0, carryWeight);
+                EquipmentItem newItem = new EquipmentItem(itemName, null, null, 0, carryWeight, false, false, null);
                 characterData.getAllItems().add(newItem);
 
                 // Update the items list view or perform other necessary updates
@@ -546,13 +551,202 @@ public class CharacterTab extends Tab {
         dialog.setWidth(400);
         dialog.setScene(dialogScene);
         dialog.showAndWait();
+
     }
-    private void createNewEquipmentItem(
-            String itemName, String selectedSlot, Map<String, Integer> modifiedStats, int hpChange, float weight
-    ) {
-        EquipmentItem equipmentItem = new EquipmentItem(itemName, selectedSlot, modifiedStats, hpChange, weight);
+
+    private void showWeaponDialog() {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Přidání nové zbraně");
+
+        VBox creationVBox = new VBox();
+        HBox creationHBox = new HBox();
+        TextField weaponNameField = new TextField();
+        weaponNameField.setPromptText("Název zbraně");
+        AtomicBoolean isDualWield = new AtomicBoolean(false);
+
+
+        CheckBox dualWieldCheckBox = new CheckBox("Je to Zweihander?");
+        dualWieldCheckBox.setSelected(false); // Set the default value to false
+        dualWieldCheckBox.setOnAction(event -> {
+            isDualWield.set(dualWieldCheckBox.isSelected());
+        });
+
+
+        TextField hpChangeField = new TextField();
+        hpChangeField.setPromptText("Změna HP");
+
+        TextField weightField = new TextField();
+        weightField.setPromptText("Váha");
+
+        Map<String, Spinner<Integer>> diceSpinners = new LinkedHashMap<>(); // Use LinkedHashMap to maintain order
+
+        Spinner<Integer> d4Spinner = new Spinner<>(0, 100, 0);
+        d4Spinner.setEditable(true);
+        d4Spinner.setMaxWidth(60);
+        diceSpinners.put("d4", d4Spinner);
+
+        Spinner<Integer> d6Spinner = new Spinner<>(0, 100, 0);
+        d6Spinner.setEditable(true);
+        d6Spinner.setMaxWidth(60);
+        diceSpinners.put("d6", d6Spinner);
+
+        Spinner<Integer> d8Spinner = new Spinner<>(0, 100, 0);
+        d8Spinner.setEditable(true);
+        d8Spinner.setMaxWidth(60);
+        diceSpinners.put("d8", d8Spinner);
+
+        Spinner<Integer> d10Spinner = new Spinner<>(0, 100, 0);
+        d10Spinner.setEditable(true);
+        d10Spinner.setMaxWidth(60);
+        diceSpinners.put("d10", d10Spinner);
+
+        Spinner<Integer> d12Spinner = new Spinner<>(0, 100, 0);
+        d12Spinner.setEditable(true);
+        d12Spinner.setMaxWidth(60);
+        diceSpinners.put("d12", d12Spinner);
+
+        Spinner<Integer> d20Spinner = new Spinner<>(0, 100, 0);
+        d20Spinner.setEditable(true);
+        d20Spinner.setMaxWidth(60);
+        diceSpinners.put("d20", d20Spinner);
+
+        List<HBox> statChangeFields = new ArrayList<>(); // Store stat change fields dynamically
+
+        Button addStatChangeButton = new Button("Přidat změnu statu");
+        addStatChangeButton.setOnAction(addEvent -> {
+            HBox newStatChangeField = new HBox();
+            ComboBox<String> newStatComboBox = new ComboBox<>();
+            newStatComboBox.getItems().addAll(characterData.getBaseStats().keySet());
+            newStatComboBox.getItems().addAll(characterData.getCustomStats().keySet());
+            newStatComboBox.setPromptText("Změněný stat");
+            TextField newStatChangeTextField = new TextField();
+            newStatChangeTextField.setPromptText("Změna statu");
+            newStatChangeField.getChildren().addAll(newStatComboBox, newStatChangeTextField);
+            statChangeFields.add(newStatChangeField);
+            creationVBox.getChildren().add(creationVBox.getChildren().size() - 2, newStatChangeField);
+
+            double preferredHeight = creationVBox.getChildren().stream()
+                    .mapToDouble(node -> node.getBoundsInParent().getMaxY())
+                    .max()
+                    .orElse(0.0) + 80;
+            dialog.setHeight(preferredHeight);
+        });
+
+        Button addButton = new Button("Přidat");
+        Button cancelButton = new Button("Zrušit");
+
+        addButton.setOnAction(event -> {
+            String weaponNameText = weaponNameField.getText();
+            String hpChangeText = hpChangeField.getText();
+            String weightText = weightField.getText();
+
+            // Check if weapon name, hp change, and weight are empty
+            if (weaponNameText.isEmpty() || hpChangeText.isEmpty() || weightText.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Chybějící údaje");
+                alert.setHeaderText("Zbraň nemůže být vytvořená");
+                alert.setContentText("Nejsou vyplněna všechna potřebná pole. Zkus to znovu.");
+                alert.showAndWait();
+                return; // Abort creation
+            }
+
+            // Check if at least one spinner is set
+            boolean atLeastOneSpinnerSet = diceSpinners.values().stream()
+                    .anyMatch(spinner -> spinner.getValue() > 0);
+
+            if (!atLeastOneSpinnerSet) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Zbraň bez damage");
+                alert.setHeaderText("Zbraň nemůže být vytvořena");
+                alert.setContentText("Nastav aspoň jednu kostku na damage a zkus to znovu");
+                alert.showAndWait();
+                return; // Abort creation
+            }
+            if (parseFloat(weightField.getText()) > characterData.calculateAvailableWeight()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Nelze přidat");
+                alert.setHeaderText("Nelze vytvořit předmět");
+                alert.setContentText("Tenhle předmět nelze v tuto chvíli uložit do inventáře, překročil by jsi tak svůj limit pro nostnost.");
+                alert.showAndWait();
+            } else {
+
+                // Generate the damageDice string based on the selected dice and their counts
+                StringBuilder damageDiceBuilder = new StringBuilder();
+                boolean firstDice = true;
+                for (Map.Entry<String, Spinner<Integer>> entry : diceSpinners.entrySet()) {
+                    int count = entry.getValue().getValue();
+                    if (count > 0) {
+                        if (!firstDice) {
+                            damageDiceBuilder.append(" + ");
+                        }
+                        damageDiceBuilder.append(count).append(entry.getKey());
+                        firstDice = false;
+                    }
+                }
+                String damageDice = damageDiceBuilder.toString();
+
+
+                Map<String, Integer> modifiedStats = new HashMap<>();
+                for (HBox statChangeField : statChangeFields) {
+                    ComboBox<String> statChangeComboBox = (ComboBox<String>) statChangeField.getChildren().get(0);
+                    TextField statChangeTextField = (TextField) statChangeField.getChildren().get(1);
+                    String selectedStat = statChangeComboBox.getValue();
+                    int statChange = Integer.parseInt(statChangeTextField.getText());
+                    modifiedStats.put(selectedStat, statChange);
+                }
+
+                createNewWeapon(weaponNameText, damageDice, modifiedStats, Integer.parseInt(hpChangeText), Float.parseFloat(weightText), isDualWield.get());
+                updateItemsListView();
+                updateCarryWeightLabel();
+                dialog.close();
+            }
+        });
+
+        cancelButton.setOnAction(event -> dialog.close());
+
+        HBox spinnersHBox = new HBox();
+        // Add the initialized spinners to the dialog
+        for (Map.Entry<String, Spinner<Integer>> entry : diceSpinners.entrySet()) {
+            HBox spinnerBox = new HBox(new Label(entry.getKey() + ":"), entry.getValue());
+            spinnerBox.setSpacing(10);
+            spinnerBox.setPadding(new Insets(0,10,10,5));
+            spinnersHBox.getChildren().add(spinnerBox);
+        }
+
+        creationHBox.getChildren().addAll(addButton, cancelButton);
+        creationHBox.setSpacing(10);
+
+        creationVBox.getChildren().addAll(
+                weaponNameField, hpChangeField, weightField, dualWieldCheckBox, addStatChangeButton, spinnersHBox, creationHBox);
+
+
+        creationVBox.setSpacing(10);
+        creationVBox.setPadding(new Insets(10));
+        Scene dialogScene = new Scene(creationVBox);
+        dialog.setWidth(700);
+        dialog.setScene(dialogScene);
+        dialog.showAndWait();
+    }
+
+    private void createNewWeapon(String itemName, String damageDice, Map<String, Integer> modifiedStats, int hpChange, float weight, boolean isTwoHanded) {
+
+        EquipmentItem equipmentItem = new EquipmentItem(itemName, "weapon", modifiedStats, hpChange, weight, true, isTwoHanded, damageDice);
         characterData.addItem(equipmentItem);
+        System.out.println(isTwoHanded);
+
     }
+
+    private void createNewEquipmentItem(String itemName, String selectedSlot, Map<String, Integer> modifiedStats, int hpChange, float weight) {
+
+        EquipmentItem equipmentItem = new EquipmentItem(itemName, selectedSlot, modifiedStats, hpChange, weight, false, false, null);
+        characterData.addItem(equipmentItem);
+
+    }
+
+
+
+
     private void showAddStatDialog() {
         List<EquipmentItem> equippedItems = characterData.getEquippedItems();
         Dialog<String[]> dialog = new Dialog<>();
