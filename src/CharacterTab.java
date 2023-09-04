@@ -21,10 +21,14 @@ public class CharacterTab extends Tab {
     ProgressBar xpProgressBar = new ProgressBar();
     ProgressBar carryProgressBar = new ProgressBar();
     Label xpInfoLabel = new Label();
+
+    Label weaponDamage = new Label("Poškození: Nemáš vybavenou zbraň");
     Label hpLabel = new Label();
     VBox statsVBox = new VBox();
     ListView<String> itemsListView = new ListView<>();
     private Label carryWeightLabel = new Label();
+
+    Button weaponSecondaryButton = new Button("Sekundární zbraň");
 
     public CharacterTab(CharacterData characterData) {
         this.characterData = characterData;
@@ -41,59 +45,71 @@ public class CharacterTab extends Tab {
         List<EquipmentItem> equippedItems = characterData.getEquippedItems();
         //Helma
         Button equipHelmetButton = new Button("Helma");
-        EquipmentSlotHandler helmaSlotHandler = new EquipmentSlotHandler("helmaSlot","Helma", equipHelmetButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler helmaSlotHandler = new EquipmentSlotHandler("helmaSlot","Helma", equipHelmetButton, equippedItems, allItems, characterData, characterTab, false);
         equipHelmetButton.setLayoutX(500);
         equipHelmetButton.setLayoutY(40);
         //Chestplate
         Button equipChestplateButton = new Button("Hrudní plát");
-        EquipmentSlotHandler chestplateSlotHandler = new EquipmentSlotHandler("hrudSlot","Hrudní plát", equipChestplateButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler chestplateSlotHandler = new EquipmentSlotHandler("hrudSlot","Hrudní plát", equipChestplateButton, equippedItems, allItems, characterData, characterTab, false);
         equipChestplateButton.setLayoutX(500);
         equipChestplateButton.setLayoutY(150);
         //Ruce
         Button equipArmsButton = new Button("Zbroj rukou");
-        EquipmentSlotHandler armsSlotHandler = new EquipmentSlotHandler("ruceSlot","Zbroj rukou", equipArmsButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler armsSlotHandler = new EquipmentSlotHandler("ruceSlot","Zbroj rukou", equipArmsButton, equippedItems, allItems, characterData, characterTab, false);
         equipArmsButton.setLayoutX(500);
         equipArmsButton.setLayoutY(250);
         //Zbroj nohou
         Button equipLeggingsButton = new Button("Zbroj nohou");
-        EquipmentSlotHandler leggingsSlotHandler = new EquipmentSlotHandler("nohySlot","Zbroj nohou", equipLeggingsButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler leggingsSlotHandler = new EquipmentSlotHandler("nohySlot","Zbroj nohou", equipLeggingsButton, equippedItems, allItems, characterData, characterTab, false);
         equipLeggingsButton.setLayoutX(500);
         equipLeggingsButton.setLayoutY(400);
         //Boty
         Button equipBootsButton = new Button("Boty");
-        EquipmentSlotHandler bootsSlotHandler = new EquipmentSlotHandler("botySlot","Boty", equipBootsButton, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler bootsSlotHandler = new EquipmentSlotHandler("botySlot","Boty", equipBootsButton, equippedItems, allItems, characterData, characterTab, false);
         equipBootsButton.setLayoutX(500);
         equipBootsButton.setLayoutY(500);
         //Prsteny
         Button equipRing1Button = new Button("Prsten");
-        EquipmentSlotHandler ring1SlotHandler = new EquipmentSlotHandler("prsten1Slot","Prsten", equipRing1Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler ring1SlotHandler = new EquipmentSlotHandler("prsten1Slot","Prsten", equipRing1Button, equippedItems, allItems, characterData, characterTab, false);
         equipRing1Button.setLayoutX(20);
         equipRing1Button.setLayoutY(80);
 
         Button equipRing2Button = new Button("Prsten");
-        EquipmentSlotHandler ring2SlotHandler = new EquipmentSlotHandler("prsten2Slot","Prsten", equipRing2Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler ring2SlotHandler = new EquipmentSlotHandler("prsten2Slot","Prsten", equipRing2Button, equippedItems, allItems, characterData, characterTab, false);
         equipRing2Button.setLayoutX(20);
         equipRing2Button.setLayoutY(120);
 
         Button equipRing3Button = new Button("Prsten");
-        EquipmentSlotHandler ring3SlotHandler = new EquipmentSlotHandler("prsten3Slot","Prsten", equipRing3Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler ring3SlotHandler = new EquipmentSlotHandler("prsten3Slot","Prsten", equipRing3Button, equippedItems, allItems, characterData, characterTab, false);
         equipRing3Button.setLayoutX(20);
         equipRing3Button.setLayoutY(160);
 
         Button equipRing4Button = new Button("Prsten");
-        EquipmentSlotHandler ring4SlotHandler = new EquipmentSlotHandler("prsten4Slot","Prsten", equipRing4Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler ring4SlotHandler = new EquipmentSlotHandler("prsten4Slot","Prsten", equipRing4Button, equippedItems, allItems, characterData, characterTab, false);
         equipRing4Button.setLayoutX(20);
         equipRing4Button.setLayoutY(200);
 
         Button equipNecklace1Button = new Button("Náhrdelník");
-        EquipmentSlotHandler necklace1SlotHandler = new EquipmentSlotHandler("nahrdelnik1Slot","Náhrdelník", equipNecklace1Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler necklace1SlotHandler = new EquipmentSlotHandler("nahrdelnik1Slot","Náhrdelník", equipNecklace1Button, equippedItems, allItems, characterData, characterTab, false);
         equipNecklace1Button.setLayoutX(20);
         equipNecklace1Button.setLayoutY(300);
 
         Button equipNecklace2Button = new Button("Náhrdelník");
-        EquipmentSlotHandler necklace2SlotHandler = new EquipmentSlotHandler("nahrdelnik2Slot","Náhrdelník", equipNecklace2Button, equippedItems, allItems, characterData, characterTab);
+        EquipmentSlotHandler necklace2SlotHandler = new EquipmentSlotHandler("nahrdelnik2Slot","Náhrdelník", equipNecklace2Button, equippedItems, allItems, characterData, characterTab, false);
         equipNecklace2Button.setLayoutX(20);
         equipNecklace2Button.setLayoutY(340);
+
+        Button weaponPrimaryButton = new Button("Primární zbraň");
+        EquipmentSlotHandler weaponPrimary = new EquipmentSlotHandler("weaponPrimary", "Zbraň", weaponPrimaryButton, equippedItems, allItems, characterData, characterTab, true);
+        weaponPrimaryButton.setLayoutX(20);
+        weaponPrimaryButton.setLayoutY(400);
+
+
+
+        EquipmentSlotHandler weaponSecondary = new EquipmentSlotHandler("weaponSecondary", "Zbraň", weaponSecondaryButton, equippedItems, allItems, characterData, characterTab, false);
+        weaponSecondaryButton.setLayoutX(20);
+        weaponSecondaryButton.setLayoutY(440);
+
 
         slotHandlers.add(helmaSlotHandler);
         slotHandlers.add(chestplateSlotHandler);
@@ -106,11 +122,13 @@ public class CharacterTab extends Tab {
         slotHandlers.add(ring4SlotHandler);
         slotHandlers.add(necklace1SlotHandler);
         slotHandlers.add(necklace2SlotHandler);
+        slotHandlers.add(weaponPrimary);
+        slotHandlers.add(weaponSecondary);
 
 
 
         Pane buttonOverlayPane = new Pane();
-        buttonOverlayPane.getChildren().addAll(equipHelmetButton, equipChestplateButton, equipArmsButton, equipLeggingsButton, equipBootsButton, equipRing1Button, equipRing2Button, equipRing3Button, equipRing4Button, equipNecklace1Button, equipNecklace2Button);
+        buttonOverlayPane.getChildren().addAll(equipHelmetButton, equipChestplateButton, equipArmsButton, equipLeggingsButton, equipBootsButton, equipRing1Button, equipRing2Button, equipRing3Button, equipRing4Button, equipNecklace1Button, equipNecklace2Button, weaponPrimaryButton, weaponSecondaryButton);
 
         StackPane imagePane = new StackPane(characterImageView, buttonOverlayPane);
 
@@ -149,6 +167,7 @@ public class CharacterTab extends Tab {
         updateCarryWeightLabel();
         updateItemsListView();
         updateHPLabel();
+        updateDamageLabel();
         hpLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
         carryWeightLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
         updateXPLabel();
@@ -164,15 +183,14 @@ public class CharacterTab extends Tab {
         Button modifyHP = new Button("Upravit HP");
         modifyHP.setOnAction(event -> showModifyHPDialog());
         Region spacer5 = new Region();
-        spacer5.setMinWidth(400);
+        spacer5.setMinWidth(270);
         HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addWeaponButton,addXPButton, modifyHP);
         bottomVBox.getChildren().addAll(bottomBox, levelManagement);
         bottomBox.setSpacing(10);
 
 
 
-
-        leftBox.getChildren().addAll(imagePane, characterName, characterRace);
+        leftBox.getChildren().addAll(imagePane, characterName, characterRace, weaponDamage);
         updateTotalStatsLabel(characterData.getTotalStats());
         Region spacer3 = new Region();
         spacer3.setMinWidth(100);
@@ -198,6 +216,13 @@ public class CharacterTab extends Tab {
 
 
 
+    }
+    public void disableSecondarySlotHandler() {
+        weaponSecondaryButton.setDisable(true);
+    }
+
+    public void enableSecondarySlotHandler() {
+        weaponSecondaryButton.setDisable(false);
     }
 
 
@@ -731,7 +756,7 @@ public class CharacterTab extends Tab {
 
     private void createNewWeapon(String itemName, String damageDice, Map<String, Integer> modifiedStats, int hpChange, float weight, boolean isTwoHanded) {
 
-        EquipmentItem equipmentItem = new EquipmentItem(itemName, "weapon", modifiedStats, hpChange, weight, true, isTwoHanded, damageDice);
+        EquipmentItem equipmentItem = new EquipmentItem(itemName, "Zbraň", modifiedStats, hpChange, weight, true, isTwoHanded, damageDice);
         characterData.addItem(equipmentItem);
         System.out.println(isTwoHanded);
 
@@ -835,6 +860,11 @@ public class CharacterTab extends Tab {
         Integer currentHP = characterData.getCurrentHealth();
         Integer maxHP = characterData.getMaxHP();
         hpLabel.setText("HP: " + currentHP + "/" + maxHP);
+    }
+
+    public void updateDamageLabel() {
+        weaponDamage.setText("Poškození: " + characterData.consolidateDamageDice());
+        weaponDamage.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
     }
     public void updateTotalStatsLabel(Map<String, Integer> totalStats) {
         // Clear existing labels

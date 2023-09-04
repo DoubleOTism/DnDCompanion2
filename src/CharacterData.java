@@ -32,12 +32,14 @@ public class CharacterData implements Serializable {
     private Integer currentHealth;
     private static final int MIN_CARRY_WEIGHT = 5;
 
+    private String currentDamage = "Nic";
 
 
 
 
 
-    public CharacterData(String characterName, String characterRace, Integer health, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems) {
+
+    public CharacterData(String characterName, String characterRace, Integer health, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems, String currentDamage) {
         this.characterName = characterName;
         this.characterRace = characterRace;
         this.baseStats = baseStats;
@@ -50,6 +52,7 @@ public class CharacterData implements Serializable {
         this.currentHealth = health;
         totalStats = new HashMap<>(baseStats);
         customStats.forEach((stat, value) -> totalStats.merge(stat, value, Integer::sum));
+        this.currentDamage = currentDamage;
 
     }
 
@@ -100,6 +103,65 @@ public class CharacterData implements Serializable {
         }
         return null; // Item not found
     }
+    public void setCurrentPlayerDamage(String newDamage) {
+        this.currentDamage = newDamage;
+    }
+
+    public String getCurrentPlayerDamage() {
+        return currentDamage;
+    }
+    public String consolidateDamageDice() {
+        Map<String, Integer> consolidatedDice = new HashMap<>();
+
+        boolean hasWeapons = false; // Flag to check if there are any weapons equipped
+
+        // Iterate through equipped weapons
+        for (EquipmentItem weapon : equippedItems) {
+            if (weapon.isWeapon()) {
+                hasWeapons = true; // Set the flag to true if a weapon is found
+
+                String damageDiceString = weapon.getDamageDice();
+
+                // Split the damageDiceString into individual dice components
+                String[] diceComponents = damageDiceString.split("\\s*\\+\\s*");
+
+                for (String component : diceComponents) {
+                    // Split each component into count and dice type
+                    String[] parts = component.split("d");
+                    if (parts.length == 2) {
+                        int diceCount = Integer.parseInt(parts[0]);
+                        String diceType = "d" + parts[1];
+
+                        // Add to consolidated dice or update the count
+                        consolidatedDice.put(diceType, consolidatedDice.getOrDefault(diceType, 0) + diceCount);
+                    }
+                }
+            }
+        }
+
+        if (!hasWeapons) {
+            return "nemáš vybavené zbraně"; // Return this message if no weapons are equipped
+        }
+
+        // Create the consolidated damage dice string
+        StringBuilder consolidatedDamageDice = new StringBuilder();
+        boolean firstDice = true;
+        for (Map.Entry<String, Integer> entry : consolidatedDice.entrySet()) {
+            int diceCount = entry.getValue();
+            if (diceCount > 0) {
+                if (!firstDice) {
+                    consolidatedDamageDice.append(" + ");
+                }
+                consolidatedDamageDice.append(diceCount).append(entry.getKey());
+                firstDice = false;
+            }
+        }
+
+        return consolidatedDamageDice.toString();
+    }
+
+
+
 
 
     //XP

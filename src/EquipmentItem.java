@@ -59,4 +59,18 @@ public class EquipmentItem implements Serializable {
 
     public void setIsWeapon(boolean b) {
     }
+
+    public String getDamageDice() {
+        return damageDice;
+    }
+
+    public boolean isTwoHanded() {
+        return isTwoHanded;
+    }
+
+    public boolean isWeapon() {
+        return isWeapon;
+    }
+
+
 }

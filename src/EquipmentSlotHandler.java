@@ -19,7 +19,9 @@ public class EquipmentSlotHandler {
     private CharacterData characterData;
     private CharacterTab characterTab;
     private String uniqueIdentifier;
-    public EquipmentSlotHandler(String uniqueIdentifier, String slotName, Button slotButton, List<EquipmentItem> equippedItems, List<EquipmentItem> allItems, CharacterData characterData, CharacterTab characterTab) {
+
+    private boolean isPrimaryWeaponSlot;
+    public EquipmentSlotHandler(String uniqueIdentifier, String slotName, Button slotButton, List<EquipmentItem> equippedItems, List<EquipmentItem> allItems, CharacterData characterData, CharacterTab characterTab, boolean isPrimaryWeaponSlot) {
         this.uniqueIdentifier = uniqueIdentifier;
         this.slotName = slotName;
         this.slotButton = slotButton;
@@ -27,6 +29,7 @@ public class EquipmentSlotHandler {
         this.allItems = allItems;
         this.characterData = characterData;
         this.characterTab = characterTab;
+        this.isPrimaryWeaponSlot = isPrimaryWeaponSlot;
         updateSlotButtonText(slotButton, characterData.getEquippedItemName(slotName));
         slotButton.setOnAction(event -> handleButtonClick());
     }
@@ -50,7 +53,6 @@ public class EquipmentSlotHandler {
             equippedItems.remove(equippedItemToRemove);
             characterData.setEquippedItemName(uniqueIdentifier, null); // Clear the equipped item name
 
-
             // Recalculate totalStats after unequipping
             characterData.updateTotalStats(equippedItems);
             characterTab.updateTotalStatsLabel(characterData.getTotalStats());
@@ -63,7 +65,15 @@ public class EquipmentSlotHandler {
             updateSlotButtonText(slotButton, slotName);
             characterTab.updateHPLabel();
             characterTab.updateCarryWeightLabel();
+            characterTab.updateDamageLabel();
 
+            // Check if the slot is "Zbraň" and the Unique Identifier is "weaponPrimary"
+            if (slotName.equals("Zbraň") && uniqueIdentifier.equals("weaponPrimary")) {
+                // Check if the unequipped weapon is two-handed, if so, enable the secondary weapon slot
+                if (equippedItemToRemove.isTwoHanded()) {
+                    characterTab.enableSecondarySlotHandler();
+                }
+            }
         } else {
             // Show equipment selection dialog and handle the selected item
             EquipmentItem selectedEquipment = showEquipmentSelectionDialog(slotName);
@@ -75,7 +85,6 @@ public class EquipmentSlotHandler {
                 characterData.modifyHP(hpChange);
                 characterData.modifyCurrentHealth(hpChange);
 
-
                 // Recalculate totalStats after equipping
                 characterData.updateTotalStats(equippedItems);
                 characterTab.updateTotalStatsLabel(characterData.getTotalStats());
@@ -84,27 +93,95 @@ public class EquipmentSlotHandler {
                 updateSlotButtonText(slotButton, selectedEquipment.getName());
                 characterTab.updateHPLabel();
                 characterTab.updateCarryWeightLabel();
+                characterTab.updateDamageLabel();
 
+                // Check if the slot is "Zbraň" and the Unique Identifier is "weaponPrimary"
+                if (slotName.equals("Zbraň") && uniqueIdentifier.equals("weaponPrimary")) {
+                    // Check if the equipped weapon is two-handed, if so, disable the secondary weapon slot
+                    if (selectedEquipment.isTwoHanded()) {
+                        disableSlotHandler("weaponSecondary");
+                    }
+                }
             }
         }
     }
+
+
+    // Helper method to disable other weapon slot handlers
+    private void disableSlotHandler(String uniqueIdentifier) {
+        // Loop through slot handlers and find the one with the specified unique identifier
+        for (EquipmentSlotHandler handler : characterTab.getSlotHandlers()) {
+            if (handler.getUniqueIdentifier().equals(uniqueIdentifier)) {
+                String equippedItemNameToRemove = characterData.getEquippedItemName(handler.getUniqueIdentifier());
+
+                // Check if the weapon slot has a weapon in it
+                if (equippedItemNameToRemove != null) {
+                    EquipmentItem equippedItemToRemove = null;
+
+                    // Find the EquipmentItem to remove based on the equipped item name
+                    for (EquipmentItem equippedItem : equippedItems) {
+                        if (equippedItem.getName().equals(equippedItemNameToRemove)) {
+                            equippedItemToRemove = equippedItem;
+                            characterTab.updateCarryWeightLabel();
+                            break;
+                        }
+                    }
+
+                    if (equippedItemToRemove != null) {
+                        equippedItems.remove(equippedItemToRemove);
+                    }
+
+                    characterData.setEquippedItemName(uniqueIdentifier, null);
+                    characterTab.updateCarryWeightLabel();
+                    assert equippedItemToRemove != null;
+                    int hpChange = equippedItemToRemove.getHpChange();
+                    characterData.modifyHP(-hpChange);
+                    characterData.modifyCurrentHealth(-hpChange);
+                    characterTab.updateHPLabel();
+                    characterData.updateTotalStats(characterData.getEquippedItems());
+                    characterTab.disableSecondarySlotHandler();
+                    updateSlotButtonText(handler.getSlotButton(), handler.getSlotName());
+                    characterTab.updateDamageLabel();
+                } else {
+                    characterTab.disableSecondarySlotHandler();
+                }
+                break; // Stop after finding and disabling the specified slot handler
+            }
+        }
+    }
+
+
+
+
+
+
+    public boolean isPrimarySlot() {
+        return isPrimaryWeaponSlot;
+    }
+    private boolean isWeapon() {
+        boolean isWeapon;
+        if (slotName.equals("Zbraň")) {
+            isWeapon = true;
+        } else {isWeapon = false;}
+        return isWeapon;
+    }
+
     private EquipmentItem showEquipmentSelectionDialog(String slotName) {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setTitle("Vyberte vybavení");
-        System.out.println("All: " + allItems);
-        System.out.println("Equipped: " + equippedItems);
+        dialog.setTitle("Select Equipment");
+
         VBox selectionVBox = new VBox();
         ListView<EquipmentItem> equipmentListView = new ListView<>();
 
         for (EquipmentItem equipmentItem : allItems) {
-            if (equipmentItem.getEquipSlots().contains(slotName) && !equippedItems.contains(equipmentItem)) {
+            if (equipmentItem.getEquipSlots().equals(slotName) && (!equipmentItem.isTwoHanded() || !slotName.equals("Zbraň") || !uniqueIdentifier.equals("weaponSecondary")) && !equippedItems.contains(equipmentItem)) {
                 equipmentListView.getItems().add(equipmentItem);
             }
         }
 
-        Button useButton = new Button("Použít");
-        Button cancelButton = new Button("Zrušit");
+        Button useButton = new Button("Equip");
+        Button cancelButton = new Button("Cancel");
 
         useButton.setOnAction(event -> dialog.close());
         cancelButton.setOnAction(event -> dialog.close());
@@ -119,14 +196,10 @@ public class EquipmentSlotHandler {
 
         return equipmentListView.getSelectionModel().getSelectedItem();
     }
-    private EquipmentItem getEquippedItemInSlot(String slotName) {
-        for (EquipmentItem equippedItem : equippedItems) {
-            if (equippedItem.getEquipSlots().contains(slotName)) {
-                return equippedItem;
-            }
-        }
-        return null;
-    }
+
+
+
+
     Button getSlotButton() {
         return slotButton;
     }

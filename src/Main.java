@@ -149,7 +149,7 @@ public class Main extends Application {
         dialog.showAndWait();
     }
     private void createNewCharacterTab(String characterName, String characterRace, Integer health, Map<String, Integer> baseStats, Map<String, Integer> customStats, List<EquipmentItem> allItems, List<EquipmentItem> equippedItems,Map<Button, String> equippedItemNames) {
-        CharacterData characterData = new CharacterData(characterName, characterRace, health, baseStats, customStats, allItems, equippedItems);
+        CharacterData characterData = new CharacterData(characterName, characterRace, health, baseStats, customStats, allItems, equippedItems, "Prázdné ruce");
         CharacterTab characterTab = new CharacterTab(characterData);
         characterDataList.add(characterData);
         characterTabs.add(characterTab);
