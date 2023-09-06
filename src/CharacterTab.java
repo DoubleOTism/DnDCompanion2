@@ -28,6 +28,8 @@ public class CharacterTab extends Tab {
     ListView<String> itemsListView = new ListView<>();
     private Label carryWeightLabel = new Label();
 
+    private Label playerMoney = new Label();
+
     Button weaponSecondaryButton = new Button("Sekundární zbraň");
 
     public CharacterTab(CharacterData characterData) {
@@ -36,10 +38,8 @@ public class CharacterTab extends Tab {
         ImageView characterImageView = createCharacterImageView();
         BorderPane borderPane = new BorderPane();
         HBox mainBox = new HBox();
-        Label characterName = new Label(characterData.getCharacterName());
-        Label characterRace = new Label("Rasa: " + characterData.getCharacterRace());
+        Label characterName = new Label(characterData.getCharacterName() + ", " + characterData.getCharacterRace());
         characterName.setStyle("-fx-text-fill: White; -fx-font-size: 20px;");
-        characterRace.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
     //Tlačítka pro výbavu
         List<EquipmentItem> allItems = characterData.getInventory();
         List<EquipmentItem> equippedItems = characterData.getEquippedItems();
@@ -151,6 +151,11 @@ public class CharacterTab extends Tab {
         Button addWeaponButton = new Button("Přidat novou zbraň");
         addWeaponButton.setOnAction(event -> showWeaponDialog());
 
+        Button showWallet = new Button("Peněženka");
+        showWallet.setOnAction(event -> { showCurrencyManagementDialog();
+            
+        });
+
 
 
 
@@ -163,7 +168,7 @@ public class CharacterTab extends Tab {
         Button addXPButton = new Button("Přidat XP");
         addXPButton.setOnAction(event -> addXP());
 
-
+        updateMoneyLabel();
         updateCarryWeightLabel();
         updateItemsListView();
         updateHPLabel();
@@ -184,13 +189,15 @@ public class CharacterTab extends Tab {
         modifyHP.setOnAction(event -> showModifyHPDialog());
         Region spacer5 = new Region();
         spacer5.setMinWidth(270);
-        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addWeaponButton,addXPButton, modifyHP);
+        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addWeaponButton,addXPButton, modifyHP, showWallet);
         bottomVBox.getChildren().addAll(bottomBox, levelManagement);
         bottomBox.setSpacing(10);
 
 
+        VBox leftBoxLower = new VBox(characterName, weaponDamage, playerMoney);
+        leftBoxLower.setPadding(new Insets(0,0,0,20));
+        leftBox.getChildren().addAll(imagePane, leftBoxLower);
 
-        leftBox.getChildren().addAll(imagePane, characterName, characterRace, weaponDamage);
         updateTotalStatsLabel(characterData.getTotalStats());
         Region spacer3 = new Region();
         spacer3.setMinWidth(100);
@@ -225,7 +232,121 @@ public class CharacterTab extends Tab {
         weaponSecondaryButton.setDisable(false);
     }
 
+    private void showCurrencyManagementDialog() {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Peněženka");
 
+        VBox dialogVBox = new VBox();
+        dialogVBox.setSpacing(10);
+        dialogVBox.setPadding(new Insets(10));
+
+        CheckBox addCheckBox = new CheckBox("Přidat do měšce");
+        addCheckBox.setSelected(true);
+        ChoiceBox<String> currencyChoiceBox = new ChoiceBox<>();
+        currencyChoiceBox.getItems().addAll("Měď", "Stříbro", "Zlato", "Platina");
+        currencyChoiceBox.setValue("Měď"); // Set default currency
+
+        TextField amountTextField = new TextField();
+        amountTextField.setPromptText("Kolik?");
+
+        Button confirmButton = new Button("Potvrdit");
+        confirmButton.setOnAction(event -> {
+            boolean isAdd = addCheckBox.isSelected();
+            String currencyType = currencyChoiceBox.getValue();
+            long amount;
+
+            try {
+                amount = Long.parseLong(amountTextField.getText());
+                updateMoneyLabel();
+            } catch (NumberFormatException e) {
+                // Show error if amount is not a valid number
+                showErrorAlert("Nesprávně zadné údaje..");
+                return;
+            }
+
+            // Calculate the actual amount to add or deduct based on currency type
+            long currencyValue = 1;
+            switch (currencyType) {
+                case "Stříbro":
+                    currencyValue = 100;
+                    break;
+                case "Zlato":
+                    currencyValue = 10000;
+                    break;
+                case "Platina":
+                    currencyValue = 1000000;
+                    break;
+                // "Měď" is already 1, so no change needed
+            }
+
+            long totalAmount = amount * currencyValue;
+
+            if (isAdd) {
+                characterData.addCurrency(totalAmount);
+                updateMoneyLabel();
+            } else {
+                boolean success = characterData.deductCurrency(totalAmount);
+                updateMoneyLabel();
+                if (!success) {
+                    // Show error if deducting fails
+                    showErrorAlert("Nedostatek kreditů pro transakci: " + totalAmount/currencyValue + " " + currencyType + ".");
+                    updateMoneyLabel();
+                    return;
+                }
+            }
+
+            dialog.close();
+        });
+
+        // Helper method to convert currency units into tiers
+        dialogVBox.getChildren().addAll(addCheckBox, currencyChoiceBox, amountTextField, confirmButton);
+        Scene dialogScene = new Scene(dialogVBox);
+        dialog.setScene(dialogScene);
+        dialog.showAndWait();
+    }
+
+    // Helper method to convert currency units into tiers
+    private String convertCurrencyUnits(long currencyUnits) {
+        String[] currencyNames = {"Platina", "Zlato", "Stříbro", "Měď"};
+        long[] currencyValues = {1000000, 10000, 100, 1};
+
+        StringBuilder tiers = new StringBuilder();
+        boolean firstTier = true;
+
+        for (int i = 0; i < currencyNames.length; i++) {
+            long tierAmount = currencyUnits / currencyValues[i];
+
+            if (tierAmount > 0) {
+                if (!firstTier) {
+                    tiers.append(", ");
+                }
+
+                tiers.append(tierAmount).append(" ").append(currencyNames[i]);
+
+                currencyUnits %= currencyValues[i];
+                firstTier = false;
+            }
+        }
+
+        return tiers.toString();
+    }
+
+    private void updateMoneyLabel() {
+        String currencyTiers = convertCurrencyUnits(characterData.getCurrency());
+        playerMoney.setText("V měšci máš: " + currencyTiers);
+        playerMoney.setStyle("-fx-text-fill: rgb(255, 215, 0); -fx-font-size: 16px;");
+
+    }
+
+    // Helper method to show an error alert
+    private void showErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
     public void createNewItemDialog() {
         Dialog<String[]> itemCreationDialog = new Dialog<>();
@@ -289,6 +410,14 @@ public class CharacterTab extends Tab {
         });
     }
 
+
+
+
+
+
+
+
+
     private void showMissingInputError() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Chybějící údaje");
@@ -296,6 +425,7 @@ public class CharacterTab extends Tab {
         alert.setContentText("Prosím, vyplň všechny pole.");
         alert.showAndWait();
     }
+
 
 
     public void updateItemsListView() {
@@ -326,6 +456,23 @@ public class CharacterTab extends Tab {
                     itemInfo += statsBuilder.toString();
                 }
 
+                // Check if the item is a weapon
+                if (equipmentItem.isWeapon()) {
+
+                    if (equipmentItem.isTwoHanded()) {
+                        itemInfo += "\nObouruční zbraň, ";
+                    } else {
+                        itemInfo += "\nJednoruční zbraň, ";
+                    }
+                    // Display damage for weapons
+                    String damageDice = equipmentItem.getDamageDice();
+                    if (damageDice != null && !damageDice.isEmpty()) {
+                        itemInfo += "poškození: " + damageDice;
+                    }
+
+                    // Check if the weapon is two-handed
+
+                }
 
                 itemsListView.getItems().add(itemInfo);
             }
@@ -371,6 +518,24 @@ public class CharacterTab extends Tab {
                         dialogVBox.getChildren().add(statsLabel);
                     }
 
+                    // Display damage for weapons
+                    if (selectedItem.isWeapon()) {
+                        String damageDice = selectedItem.getDamageDice();
+                        if (damageDice != null && !damageDice.isEmpty()) {
+                            Label damageLabel = new Label("Poškození: " + damageDice);
+                            dialogVBox.getChildren().add(damageLabel);
+                        }
+
+                        // Check if the weapon is two-handed
+                        if (selectedItem.isTwoHanded()) {
+                            Label weaponTypeLabel = new Label("Typ zbraně: Obouruční zbraň");
+                            dialogVBox.getChildren().add(weaponTypeLabel);
+                        } else {
+                            Label weaponTypeLabel = new Label("Typ zbraně: Jednoruční zbraň");
+                            dialogVBox.getChildren().add(weaponTypeLabel);
+                        }
+                    }
+
                     // Add a button to remove the item
                     Button removeButton = new Button("Odebrat předmět");
                     removeButton.setOnAction(removeEvent -> {
@@ -398,6 +563,7 @@ public class CharacterTab extends Tab {
             }
         });
     }
+
     private void addXP() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Přidání XP");
@@ -772,6 +938,7 @@ public class CharacterTab extends Tab {
 
 
 
+
     private void showAddStatDialog() {
         List<EquipmentItem> equippedItems = characterData.getEquippedItems();
         Dialog<String[]> dialog = new Dialog<>();
@@ -864,7 +1031,7 @@ public class CharacterTab extends Tab {
 
     public void updateDamageLabel() {
         weaponDamage.setText("Poškození: " + characterData.consolidateDamageDice());
-        weaponDamage.setStyle("-fx-text-fill: White; -fx-font-size: 16px;");
+        weaponDamage.setStyle("-fx-text-fill: Red; -fx-font-size: 16px;");
     }
     public void updateTotalStatsLabel(Map<String, Integer> totalStats) {
         // Clear existing labels

@@ -1,7 +1,4 @@
-import javafx.scene.control.Button;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +31,9 @@ public class CharacterData implements Serializable {
 
     private String currentDamage = "Nic";
 
+    private long currencyUnits;
+
+
 
 
 
@@ -53,8 +53,10 @@ public class CharacterData implements Serializable {
         totalStats = new HashMap<>(baseStats);
         customStats.forEach((stat, value) -> totalStats.merge(stat, value, Integer::sum));
         this.currentDamage = currentDamage;
-
+        this.currencyUnits = 0;
     }
+
+
 
     public String getCharacterName() {
         return characterName;
@@ -140,7 +142,7 @@ public class CharacterData implements Serializable {
         }
 
         if (!hasWeapons) {
-            return "nemáš vybavené zbraně"; // Return this message if no weapons are equipped
+            return "1d4"; // Return this message if no weapons are equipped
         }
 
         // Create the consolidated damage dice string
@@ -306,4 +308,24 @@ public class CharacterData implements Serializable {
         double progress = currentWeight / maxCarryWeight;
         return Math.min(1.0, progress); // Cap at 1.0 (100%)
     }
+
+    public void addCurrency(long units) {
+        this.currencyUnits += units;
+    }
+
+    // Deduct units from the character's currency, returns true if there are enough units to deduct, false otherwise
+    public boolean deductCurrency(long units) {
+        if (this.currencyUnits >= units) {
+            this.currencyUnits -= units;
+            return true;
+        }
+        return false;
+    }
+
+    // Get the character's currency in various denominations
+    public long getCurrency() {
+        return currencyUnits;
+    }
+
+
 }
