@@ -33,6 +33,9 @@ public class CharacterData implements Serializable {
 
     private long currencyUnits;
 
+    private Map<String, String> characterAbilities = new HashMap<>();
+
+
 
 
 
@@ -54,7 +57,19 @@ public class CharacterData implements Serializable {
         customStats.forEach((stat, value) -> totalStats.merge(stat, value, Integer::sum));
         this.currentDamage = currentDamage;
         this.currencyUnits = 0;
+
     }
+    public void addAbility(String name, String description) {
+        characterAbilities.put(name, description);
+    }
+
+    public void removeAbility(String name) {
+        characterAbilities.remove(name);
+    }
+
+
+
+
 
 
 
@@ -328,4 +343,7 @@ public class CharacterData implements Serializable {
     }
 
 
+    public Map<String, String> getCharacterAbilities() {
+        return characterAbilities;
+    }
 }

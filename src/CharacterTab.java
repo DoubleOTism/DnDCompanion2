@@ -4,6 +4,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -31,6 +32,10 @@ public class CharacterTab extends Tab {
     private Label playerMoney = new Label();
 
     Button weaponSecondaryButton = new Button("Sekundární zbraň");
+
+    ListView<String> abilitiesListView = new ListView<>();
+
+
 
     public CharacterTab(CharacterData characterData) {
         this.characterData = characterData;
@@ -155,6 +160,19 @@ public class CharacterTab extends Tab {
         showWallet.setOnAction(event -> { showCurrencyManagementDialog();
             
         });
+        Button showAbilities = new Button("Abilitky");
+        showAbilities.setOnAction(event -> { showAbilityCreationDialog();
+        });
+
+        abilitiesListView.setOnMouseClicked(event -> {
+            String selectedAbilityName = abilitiesListView.getSelectionModel().getSelectedItem();
+            if (!selectedAbilityName.equals("Žádné schopnosti")) {
+                String description = characterData.getCharacterAbilities().get(selectedAbilityName);
+                showAbilityDescriptionDialog(selectedAbilityName, description);
+            }
+        });
+
+
 
 
 
@@ -168,6 +186,7 @@ public class CharacterTab extends Tab {
         Button addXPButton = new Button("Přidat XP");
         addXPButton.setOnAction(event -> addXP());
 
+        updateAbilitiesListView();
         updateMoneyLabel();
         updateCarryWeightLabel();
         updateItemsListView();
@@ -188,15 +207,19 @@ public class CharacterTab extends Tab {
         Button modifyHP = new Button("Upravit HP");
         modifyHP.setOnAction(event -> showModifyHPDialog());
         Region spacer5 = new Region();
-        spacer5.setMinWidth(270);
-        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addWeaponButton,addXPButton, modifyHP, showWallet);
-        bottomVBox.getChildren().addAll(bottomBox, levelManagement);
+        spacer5.setMinWidth(200);
+        Region spacer8 = new Region();
+        spacer8.setMinHeight(10);
+        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addWeaponButton,addXPButton, modifyHP, showWallet, showAbilities);
+        bottomVBox.getChildren().addAll(bottomBox, spacer8, levelManagement);
         bottomBox.setSpacing(10);
 
 
         VBox leftBoxLower = new VBox(characterName, weaponDamage, playerMoney);
         leftBoxLower.setPadding(new Insets(0,0,0,20));
         leftBox.getChildren().addAll(imagePane, leftBoxLower);
+        abilitiesListView.setMaxHeight(150);
+        abilitiesListView.setMaxWidth(480);
 
         updateTotalStatsLabel(characterData.getTotalStats());
         Region spacer3 = new Region();
@@ -210,12 +233,14 @@ public class CharacterTab extends Tab {
         scrollPane.setFitToWidth(true);
         Region spacer6 = new Region();
         spacer6.setMinHeight(20);
+        Region spacer7 = new Region();
+        spacer7.setMinHeight(20);
         scrollPane.setStyle("-fx-background: rgb(40, 40, 40); -fx-border-color: rgb(40, 40, 40);");
-        rightBox.getChildren().addAll(spacer6, scrollPane, spacer2, itemsListView);
+        rightBox.getChildren().addAll(spacer6, scrollPane, spacer2, itemsListView, spacer7, abilitiesListView);
         itemsListView.setMaxWidth(480);
-        itemsListView.setMaxHeight(350);
+        itemsListView.setMaxHeight(200);
+        scrollPane.setMaxHeight(300);
         rightBox.setMinWidth(600);
-        rightBox.setMaxHeight(600);
         borderPane.setCenter(mainBox);
         borderPane.setBottom(bottomVBox);
         setContent(borderPane);
@@ -224,6 +249,102 @@ public class CharacterTab extends Tab {
 
 
     }
+
+    private void showAbilityCreationDialog() {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Vytvoření nové schopnosti");
+
+        VBox vbox = new VBox();
+        TextField nameField = new TextField();
+        nameField.setPromptText("Název schopnosti");
+        TextArea descriptionArea = new TextArea();
+        descriptionArea.setPromptText("Popis schopnosti");
+
+        Button createButton = new Button("Vytvořit");
+        Button cancelButton = new Button("Zrušit");
+
+        createButton.setOnAction(event -> {
+            String abilityName = nameField.getText();
+            String abilityDescription = descriptionArea.getText();
+
+            if (!abilityName.isEmpty() && !abilityDescription.isEmpty()) {
+                characterData.addAbility(abilityName, abilityDescription);
+                updateAbilitiesListView();
+                dialog.close();
+            } else {
+                // Show an alert if either field is empty
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Chyba");
+                alert.setHeaderText("Chybějící informace");
+                alert.setContentText("Vyplň jak název, tak popis schopnosti a zkus to znovu.");
+                alert.showAndWait();
+            }
+        });
+
+        cancelButton.setOnAction(event -> dialog.close());
+
+        vbox.getChildren().addAll(nameField, descriptionArea, createButton, cancelButton);
+        vbox.setSpacing(10);
+        vbox.setPadding(new Insets(10));
+
+        Scene dialogScene = new Scene(vbox, 400, 200);
+        dialog.setScene(dialogScene);
+        dialog.show();
+    }
+
+
+    private void showAbilityDescriptionDialog(String abilityName, String description) {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Detaily");
+
+        VBox vbox = new VBox();
+        Text descriptionText = new Text(description);
+        Button removeButton = new Button("Odstranit");
+
+        removeButton.setOnAction(event -> {
+            // Show a confirmation dialog before removing the ability
+            boolean confirmed = showRemoveConfirmationDialog(abilityName);
+            if (confirmed) {
+                characterData.removeAbility(abilityName);
+                updateAbilitiesListView();
+                dialog.close();
+            }
+        });
+
+        vbox.getChildren().addAll(descriptionText, removeButton);
+        vbox.setSpacing(10);
+        vbox.setPadding(new Insets(10));
+
+        Scene dialogScene = new Scene(vbox, 400, 200);
+        dialog.setScene(dialogScene);
+        dialog.show();
+    }
+
+    private boolean showRemoveConfirmationDialog(String abilityName) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Upozornění");
+        alert.setHeaderText("Potvrzení odstranění");
+        alert.setContentText("Opravdu chceš odstranit schopnost '" + abilityName + "'?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
+    }
+
+
+    public void updateAbilitiesListView() {
+        Map<String, String> abilities = characterData.getCharacterAbilities();
+
+        if (abilities.isEmpty()) {
+            abilitiesListView.getItems().clear();
+            abilitiesListView.getItems().add("Žádné schopnosti");
+        } else {
+            abilitiesListView.getItems().clear();
+            abilitiesListView.getItems().addAll(abilities.keySet());
+        }
+    }
+
     public void disableSecondarySlotHandler() {
         weaponSecondaryButton.setDisable(true);
     }
@@ -1079,6 +1200,7 @@ public class CharacterTab extends Tab {
         carryWeightLabel.setText("Nosnost: " + characterData.calculateCurrentWeight() + "/" + characterData.calculateCarryWeight());
         carryProgressBar.setProgress(characterData.getWeightRatio());
     }
+
 
 
 

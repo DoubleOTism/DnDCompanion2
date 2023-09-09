@@ -35,6 +35,7 @@ public class Main extends Application {
         primaryStage.setTitle("Character App");
         root.setBackground(new Background(new BackgroundFill(Color.rgb(40, 40, 40), CornerRadii.EMPTY, Insets.EMPTY)));
         primaryStage.show();
+        primaryStage.setResizable(false);
     }
     private MenuBar createMenuBar() {
         MenuBar menuBar = new MenuBar();
