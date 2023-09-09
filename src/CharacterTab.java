@@ -238,7 +238,7 @@ public class CharacterTab extends Tab {
         scrollPane.setStyle("-fx-background: rgb(40, 40, 40); -fx-border-color: rgb(40, 40, 40);");
         rightBox.getChildren().addAll(spacer6, scrollPane, spacer2, itemsListView, spacer7, abilitiesListView);
         itemsListView.setMaxWidth(480);
-        itemsListView.setMaxHeight(200);
+        itemsListView.setMaxHeight(150);
         scrollPane.setMaxHeight(300);
         rightBox.setMinWidth(600);
         borderPane.setCenter(mainBox);
@@ -551,7 +551,7 @@ public class CharacterTab extends Tab {
 
     public void updateItemsListView() {
         itemsListView.getItems().clear();
-        itemsListView.setMaxHeight(400);
+        itemsListView.setMaxHeight(150);
         if (characterData.getAllItems().isEmpty()) {
             itemsListView.getItems().add("Batoh je prázdný");
         } else {
@@ -1004,9 +1004,14 @@ public class CharacterTab extends Tab {
                     ComboBox<String> statChangeComboBox = (ComboBox<String>) statChangeField.getChildren().get(0);
                     TextField statChangeTextField = (TextField) statChangeField.getChildren().get(1);
                     String selectedStat = statChangeComboBox.getValue();
-                    int statChange = Integer.parseInt(statChangeTextField.getText());
-                    modifiedStats.put(selectedStat, statChange);
+
+                    // Check if a stat is selected
+                    if (selectedStat != null && !selectedStat.isEmpty()) {
+                        int statChange = Integer.parseInt(statChangeTextField.getText());
+                        modifiedStats.put(selectedStat, statChange);
+                    }
                 }
+
 
                 createNewWeapon(weaponNameText, damageDice, modifiedStats, Integer.parseInt(hpChangeText), Float.parseFloat(weightText), isDualWield.get());
                 updateItemsListView();
