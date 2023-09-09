@@ -1,4 +1,5 @@
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -160,9 +161,12 @@ public class CharacterTab extends Tab {
         showWallet.setOnAction(event -> { showCurrencyManagementDialog();
             
         });
-        Button showAbilities = new Button("Abilitky");
+        Button showAbilities = new Button("Schopnosti");
         showAbilities.setOnAction(event -> { showAbilityCreationDialog();
         });
+
+        Button editStat = new Button("Upravit stat");
+        editStat.setOnAction(event -> { showStatChangeDialog(characterData);});
 
         abilitiesListView.setOnMouseClicked(event -> {
             String selectedAbilityName = abilitiesListView.getSelectionModel().getSelectedItem();
@@ -207,10 +211,10 @@ public class CharacterTab extends Tab {
         Button modifyHP = new Button("Upravit HP");
         modifyHP.setOnAction(event -> showModifyHPDialog());
         Region spacer5 = new Region();
-        spacer5.setMinWidth(200);
+        spacer5.setMinWidth(150);
         Region spacer8 = new Region();
         spacer8.setMinHeight(10);
-        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addWeaponButton,addXPButton, modifyHP, showWallet, showAbilities);
+        HBox bottomBox = new HBox(spacer5, addStatButton, newArmorButton, addNewItem, addWeaponButton,addXPButton, modifyHP, showWallet, showAbilities, editStat);
         bottomVBox.getChildren().addAll(bottomBox, spacer8, levelManagement);
         bottomBox.setSpacing(10);
 
@@ -321,6 +325,58 @@ public class CharacterTab extends Tab {
         dialog.setScene(dialogScene);
         dialog.show();
     }
+
+
+        private void showStatChangeDialog(CharacterData characterData) {
+            Dialog<Void> dialog = new Dialog<>();
+            List<EquipmentItem> equippedItems = characterData.getEquippedItems();
+            dialog.setTitle("Změnit stat");
+            dialog.setHeaderText("Vyber si stat a jak ho chceš změnit (dej před číslo mínus abys odebral body od statistiky)");
+
+            ButtonType doneButtonType = new ButtonType("Potvrdit", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(doneButtonType, ButtonType.CANCEL);
+
+            ChoiceBox<String> statChoiceBox = new ChoiceBox<>();
+            statChoiceBox.getItems().addAll(characterData.getBaseStats().keySet());
+            statChoiceBox.getItems().addAll(characterData.getCustomStats().keySet());
+            statChoiceBox.setValue("Vyber si stat");
+
+            TextField amountTextField = new TextField();
+            amountTextField.setPromptText("Hodnota");
+
+            VBox vbox = new VBox(statChoiceBox, amountTextField);
+            vbox.setSpacing(10);
+            vbox.setPadding(new Insets(20));
+
+            dialog.getDialogPane().setContent(vbox);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == doneButtonType) {
+                    String selectedStat = statChoiceBox.getValue();
+                    String amountText = amountTextField.getText();
+                    if (selectedStat != null && !amountText.isEmpty()) {
+                        try {
+                            int amount = Integer.parseInt(amountText);
+                            characterData.addToStat(selectedStat, amount);
+
+                            updateTotalStatsLabel(characterData.getTotalStats());
+                        } catch (NumberFormatException e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Chyba");
+                            alert.setHeaderText("Špatně zapsaná změna");
+                            alert.setContentText("Zadal jsi špatně číslo. Zkus to znovu.");
+                            alert.showAndWait();
+                        }
+                    }
+                }
+                return null;
+            });
+
+            dialog.showAndWait();
+        }
+
+
+
 
     private boolean showRemoveConfirmationDialog(String abilityName) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -510,23 +566,37 @@ public class CharacterTab extends Tab {
         Optional<String[]> result = itemCreationDialog.showAndWait();
         result.ifPresent(itemData -> {
             String itemName = itemData[0];
-            float carryWeight = parseFloat(itemData[1]);
-            float capacity = characterData.calculateAvailableWeight();
-            if (carryWeight > capacity) {
+            String carryWeightStr = itemData[1];
+
+            // Try to parse carryWeightStr as a float
+            float carryWeight;
+            try {
+                carryWeight = Float.parseFloat(carryWeightStr);
+
+                // Check if carryWeight is greater than the available capacity
+                float capacity = characterData.calculateAvailableWeight();
+                if (carryWeight > capacity) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Nelze přidat");
+                    alert.setHeaderText("Nelze vytvořit předmět");
+                    alert.setContentText("Tenhle předmět nelze v tuto chvíli uložit do inventáře, překročil by jsi tak svůj limit pro nostnost.");
+                    alert.showAndWait();
+                } else {
+                    // Create the EquipmentItem instance and add it to allItems
+                    EquipmentItem newItem = new EquipmentItem(itemName, null, null, 0, carryWeight, false, false, null);
+                    characterData.getAllItems().add(newItem);
+
+                    // Update the items list view or perform other necessary updates
+                    updateItemsListView();
+                    updateCarryWeightLabel();
+                }
+            } catch (NumberFormatException e) {
+                // Handle cases where carryWeightStr cannot be parsed as a float
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Nelze přidat");
-                alert.setHeaderText("Nelze vytvořit předmět");
-                alert.setContentText("Tenhle předmět nelze v tuto chvíli uložit do inventáře, překročil by jsi tak svůj limit pro nostnost.");
+                alert.setTitle("Chyba");
+                alert.setHeaderText("Nepodařilo se vytvořit předmět");
+                alert.setContentText("Zadal jsi neplatnou váhu předmětu.");
                 alert.showAndWait();
-            } else {
-
-                // Create the EquipmentItem instance and add it to allItems
-                EquipmentItem newItem = new EquipmentItem(itemName, null, null, 0, carryWeight, false, false, null);
-                characterData.getAllItems().add(newItem);
-
-                // Update the items list view or perform other necessary updates
-                updateItemsListView();
-                updateCarryWeightLabel();
             }
         });
     }
@@ -669,9 +739,9 @@ public class CharacterTab extends Tab {
                             errorAlert.showAndWait();
                         } else {
                             characterData.getAllItems().remove(selectedItem);
-                            updateItemsListView(); // Update the ListView after removing the item
+                            updateItemsListView();
                             updateCarryWeightLabel();
-                            itemDialog.close(); // Close the dialog
+                            itemDialog.close();
                         }
                     });
                     dialogVBox.getChildren().add(removeButton);
@@ -694,17 +764,47 @@ public class CharacterTab extends Tab {
         if (result.isPresent()) {
             try {
                 int xpToAdd = Integer.parseInt(result.get());
-                int newXp = characterData.getXP() + xpToAdd;
-                if (newXp >= characterData.getRequireXP()) {
+                int currentXP = characterData.getXP();
+                int newXp = currentXP + xpToAdd;
+
+                int remainingXP = newXp;
+
+                while (remainingXP >= characterData.getRequireXP()) {
+                    int xpNeededForNextLevel = characterData.getRequireXP();
                     showLevelUpDialog();
+                    remainingXP -= xpNeededForNextLevel;
+                    characterData.setXP(remainingXP);
+                    xpProgressBar.setProgress(characterData.getXPProgress());
+                    updateXPLabel();
+
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    xpNeededForNextLevel = characterData.getRequireXP();
                 }
+
+                // Nemám sebemenší tušení proč to musím volat dvakrát, ale jinak to kurva nefunguje.
                 characterData.setXP(newXp);
                 xpProgressBar.setProgress(characterData.getXPProgress());
+                characterData.setXP(remainingXP);
+                xpProgressBar.setProgress(characterData.getXPProgress());
                 updateXPLabel();
+
             } catch (NumberFormatException e) {
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Chyba");
+                errorAlert.setHeaderText("Chyba v přidání XP");
+                errorAlert.setContentText("Někde jsi udělal chybu, nelze přidat takové množství XP. Zkus to znovu.");
+                errorAlert.showAndWait();
             }
         }
     }
+
+
     private void showLevelUpDialog() {
         Map<String, Integer> totalStats = characterData.getTotalStats();
         List<EquipmentItem> equipmentItems = characterData.getEquippedItems();
@@ -840,10 +940,26 @@ public class CharacterTab extends Tab {
                 for (HBox statChangeField : statChangeFields) {
                     ComboBox<String> statChangeComboBox = (ComboBox<String>) statChangeField.getChildren().get(0);
                     TextField statChangeTextField = (TextField) statChangeField.getChildren().get(1);
+
                     String selectedStat = statChangeComboBox.getValue();
-                    int statChange = Integer.parseInt(statChangeTextField.getText());
-                    modifiedStats.put(selectedStat, statChange);
+                    String statChangeText = statChangeTextField.getText().trim();
+
+                    // Check if both selectedStat and statChangeText are not null and not empty
+                    if (selectedStat != null && !selectedStat.isEmpty() && statChangeText != null && !statChangeText.isEmpty()) {
+                        // Try to parse the statChangeText as an integer
+                        try {
+                            int statChange = Integer.parseInt(statChangeText);
+                            modifiedStats.put(selectedStat, statChange);
+                        } catch (NumberFormatException e) {
+                            // Handle cases where statChangeText cannot be parsed as an integer (ignore)
+                        }
+                    }
                 }
+
+
+
+
+
                 createNewEquipmentItem(itemName, selectedSlot, modifiedStats, hpChange, weight);
                 updateItemsListView();
                 updateCarryWeightLabel();
@@ -1003,12 +1119,19 @@ public class CharacterTab extends Tab {
                 for (HBox statChangeField : statChangeFields) {
                     ComboBox<String> statChangeComboBox = (ComboBox<String>) statChangeField.getChildren().get(0);
                     TextField statChangeTextField = (TextField) statChangeField.getChildren().get(1);
-                    String selectedStat = statChangeComboBox.getValue();
 
-                    // Check if a stat is selected
-                    if (selectedStat != null && !selectedStat.isEmpty()) {
-                        int statChange = Integer.parseInt(statChangeTextField.getText());
-                        modifiedStats.put(selectedStat, statChange);
+                    String selectedStat = statChangeComboBox.getValue();
+                    String statChangeText = statChangeTextField.getText().trim();
+
+                    // Check if both selectedStat and statChangeText are not null and not empty
+                    if (selectedStat != null && !selectedStat.isEmpty() && statChangeText != null && !statChangeText.isEmpty()) {
+                        // Try to parse the statChangeText as an integer
+                        try {
+                            int statChange = Integer.parseInt(statChangeText);
+                            modifiedStats.put(selectedStat, statChange);
+                        } catch (NumberFormatException e) {
+                            // Handle cases where statChangeText cannot be parsed as an integer (ignore)
+                        }
                     }
                 }
 
@@ -1050,7 +1173,6 @@ public class CharacterTab extends Tab {
 
         EquipmentItem equipmentItem = new EquipmentItem(itemName, "Zbraň", modifiedStats, hpChange, weight, true, isTwoHanded, damageDice);
         characterData.addItem(equipmentItem);
-        System.out.println(isTwoHanded);
 
     }
 
@@ -1102,11 +1224,21 @@ public class CharacterTab extends Tab {
             String baseValueText = statData[1];
 
             if (!newStatName.isEmpty() && !baseValueText.isEmpty()) {
-                int baseValue = Integer.parseInt(baseValueText);
-                characterData.getCustomStats().put(newStatName, baseValue);
-                characterData.updateTotalStats(equippedItems);
-                updateTotalStatsLabel(characterData.getTotalStats());
+                try {
+                    int baseValue = Integer.parseInt(baseValueText);
+                    characterData.getCustomStats().put(newStatName, baseValue);
+                    characterData.updateTotalStats(equippedItems);
+                    updateTotalStatsLabel(characterData.getTotalStats());
+                } catch (NumberFormatException e) {
+                    // Display an alert indicating that the baseValue is not a valid integer
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Špatná hodnota");
+                    alert.setHeaderText("Špatná hodnota");
+                    alert.setContentText("Zkus to znovu, zadal jsi špatně hodnotu nového statu.");
+                    alert.showAndWait();
+                }
             }
+
         });
     }
 

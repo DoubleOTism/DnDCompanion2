@@ -70,7 +70,23 @@ public class CharacterData implements Serializable {
 
 
 
-
+    public void addToStat(String statName, int amount) {
+        // Check if the stat is in baseStats
+        if (baseStats.containsKey(statName)) {
+            int currentStatValue = baseStats.get(statName);
+            int newStatValue = currentStatValue + amount;
+            baseStats.put(statName, newStatValue);
+            updateTotalStats(equippedItems);
+        }
+        // Check if the stat is in customStats
+        else if (customStats.containsKey(statName)) {
+            int currentStatValue = customStats.get(statName);
+            int newStatValue = currentStatValue + amount;
+            customStats.put(statName, newStatValue);
+            updateTotalStats(equippedItems);
+        }
+        // Ignore if the stat is not found in either baseStats or customStats
+    }
 
 
     public String getCharacterName() {
