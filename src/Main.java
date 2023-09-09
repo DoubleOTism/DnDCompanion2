@@ -170,7 +170,7 @@ public class Main extends Application {
             Alert exitConfirmation = new Alert(Alert.AlertType.INFORMATION);
             exitConfirmation.setTitle("O Aplikaci");
             exitConfirmation.setHeaderText("DnD Companion 2, verze R1");
-            exitConfirmation.setContentText("Aplikace specificky určena pro užití na DC serveru Ředitelství. \nPokud si chceš vytvořit nový charakter, jdi do Start>Nový Charakter \nNepoužívej manuální uložení a načtení, pokud nemusíš, vše se načte při zapnutí a uloží při odchodu a autosaves jsou v intervalech 5 minut. \nPro více info se ptej na DC. \n\nVytvořil Erich Pross (King Erich the Terrible/DoubleOTism) za PyJCollective, 2023.");
+            exitConfirmation.setContentText("Aplikace specificky určena pro užití na DC serveru Ředitelství. \nPokud si chceš vytvořit nový charakter, jdi do Start>Nový Charakter \nNepoužívej manuální uložení a načtení pokud nemusíš, vše se načte při zapnutí a uloží při odchodu a autosaves jsou v intervalech 5 minut. \nPro více info se ptej na DC. \n\nVytvořil Erich Pross (King Erich the Terrible/DoubleOTism) za PyJCollective, 2023.");
             exitConfirmation.showAndWait();
         });
         MenuItem exit = new MenuItem("Odejít");
