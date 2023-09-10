@@ -360,6 +360,9 @@ public class CharacterTab extends Tab {
                             characterData.addToStat(selectedStat, amount);
 
                             updateTotalStatsLabel(characterData.getTotalStats());
+                            updateCarryWeightLabel();
+                            updateHPLabel();
+                            updateDamageLabel();
                         } catch (NumberFormatException e) {
                             Alert alert = new Alert(Alert.AlertType.ERROR);
                             alert.setTitle("Chyba");
@@ -519,7 +522,7 @@ public class CharacterTab extends Tab {
     // Helper method to show an error alert
     private void showErrorAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
+        alert.setTitle("Chyba");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

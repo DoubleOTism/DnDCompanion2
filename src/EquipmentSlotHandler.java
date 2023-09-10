@@ -169,7 +169,7 @@ public class EquipmentSlotHandler {
     private EquipmentItem showEquipmentSelectionDialog(String slotName) {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setTitle("Select Equipment");
+        dialog.setTitle("Výběr vybavení");
 
         VBox selectionVBox = new VBox();
         ListView<EquipmentItem> equipmentListView = new ListView<>();
@@ -180,8 +180,8 @@ public class EquipmentSlotHandler {
             }
         }
 
-        Button useButton = new Button("Equip");
-        Button cancelButton = new Button("Cancel");
+        Button useButton = new Button("Vybavit");
+        Button cancelButton = new Button("Zrušit");
 
         useButton.setOnAction(event -> dialog.close());
         cancelButton.setOnAction(event -> dialog.close());

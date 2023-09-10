@@ -224,6 +224,8 @@ public class Main extends Application {
         defenseField.setPromptText("Obrana");
         TextField luckField = new TextField();
         luckField.setPromptText("Štěstí");
+        TextField agilityField = new TextField();
+        agilityField.setPromptText("Obratnost");
         TextField intelligenceField = new TextField();
         intelligenceField.setPromptText("Inteligence");
         TextField perceptionField = new TextField();
@@ -261,7 +263,7 @@ public class Main extends Application {
                 customStatsVBox.getChildren().add(addCustomStatButton);
             }
         });
-        creationVBox.getChildren().addAll(characterNameField, characterRaceField, useCustomStatsCheckbox, strengthField, defenseField, luckField, intelligenceField, perceptionField, speechField, accuracyField, hpField,customStatsVBox, addButton, cancelButton);
+        creationVBox.getChildren().addAll(characterNameField, characterRaceField, useCustomStatsCheckbox, strengthField, defenseField, luckField, agilityField, intelligenceField, perceptionField, speechField, accuracyField, hpField,customStatsVBox, addButton, cancelButton);
         creationVBox.setSpacing(10);
         creationVBox.setPadding(new Insets(10));
 
@@ -274,6 +276,7 @@ public class Main extends Application {
             baseStats.put("Síla", parseIntOrDefault(strengthField.getText()));
             baseStats.put("Obrana", parseIntOrDefault(defenseField.getText()));
             baseStats.put("Štěstí", parseIntOrDefault(luckField.getText()));
+            baseStats.put("Obratnost", parseIntOrDefault(agilityField.getText()));
             baseStats.put("Inteligence", parseIntOrDefault(intelligenceField.getText()));
             baseStats.put("Vnímavost", parseIntOrDefault(perceptionField.getText()));
             baseStats.put("Výřečnost", parseIntOrDefault(speechField.getText()));
@@ -455,6 +458,13 @@ public class Main extends Application {
                             String equippedItemName = equippedItemNames.get(slotHandler.getUniqueIdentifier());
                             slotHandler.updateSlotButtonText(slotButton, equippedItemName);
                         }
+
+                        // Check if a two-handed weapon is equipped and print a message if found
+                        for (EquipmentItem equippedItem : loadedCharacterData.getEquippedItems()) {
+                            if (equippedItem.isTwoHanded()) {
+                                loadedCharacterTab.disableSecondarySlotHandler();
+                            }
+                        }
                     }
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -468,6 +478,7 @@ public class Main extends Application {
             alert.showAndWait();
         }
     }
+
 
 
     private File getLatestFile(File[] files) {
