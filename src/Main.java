@@ -14,10 +14,7 @@ import javax.swing.filechooser.FileSystemView;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +52,9 @@ public class Main extends Application {
         loadLatestCharacterData();
         setupAutosave();
 
+
+
+
         primaryStage.setOnCloseRequest(event -> {
             event.consume(); // Consume the close event to prevent immediate app exit
 
@@ -80,7 +80,35 @@ public class Main extends Application {
                 }
             });
         });
+
+
+
     }
+
+    // Handle tab close request with confirmation dialog
+// Handle tab close request with confirmation dialog
+    private void handleTabCloseRequest(CharacterTab characterTab) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Potvrdit odstranění charakteru");
+        alert.setHeaderText("Jsi si jistý odstraněním charakteru?");
+        alert.setContentText("Tato akce nemůže být navrácena.");
+
+        ButtonType removeButtonType = new ButtonType("Odstranit");
+        ButtonType cancelButtonType = new ButtonType("Zrušit", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(removeButtonType, cancelButtonType);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == removeButtonType) {
+            CharacterData characterDataToRemove = characterTab.getCharacterData();
+            characterDataList.remove(characterDataToRemove);
+            tabPane.getTabs().remove(characterTab);
+        }
+    }
+
+
+
+
 
     private void manualSaveCharacterData(List<CharacterData> characterDataList) {
         FileChooser fileChooser = new FileChooser();
@@ -131,6 +159,10 @@ public class Main extends Application {
                 characterDataList.add(loadedCharacterData);
                 characterTabs.add(loadedCharacterTab);
                 tabPane.getTabs().add(loadedCharacterTab);
+                loadedCharacterTab.setOnCloseRequest(event -> {
+                    event.consume(); // Prevent the tab from closing
+                    handleTabCloseRequest(loadedCharacterTab);
+                });
 
                 // Update equipped items' buttons based on saved data
                 Map<String, String> equippedItemNames = loadedCharacterData.getEquippedItemNames();
@@ -308,6 +340,7 @@ public class Main extends Application {
         characterDataList.add(characterData);
         characterTabs.add(characterTab);
         tabPane.getTabs().add(characterTab);
+        characterTab.setOnCloseRequest(event -> handleTabCloseRequest(characterTab));
     }
 
     private int parseIntOrDefault(String value) {
@@ -384,6 +417,10 @@ public class Main extends Application {
             characterDataList.add(loadedCharacterData);
             characterTabs.add(loadedCharacterTab);
             tabPane.getTabs().add(loadedCharacterTab);
+            loadedCharacterTab.setOnCloseRequest(event -> {
+                event.consume(); // Prevent the tab from closing
+                handleTabCloseRequest(loadedCharacterTab);
+            });
 
             // Update equipped items' buttons based on saved data
             Map<String, String> equippedItemNames = loadedCharacterData.getEquippedItemNames();
@@ -449,6 +486,11 @@ public class Main extends Application {
                         characterDataList.add(loadedCharacterData);
                         characterTabs.add(loadedCharacterTab);
                         tabPane.getTabs().add(loadedCharacterTab);
+                        loadedCharacterTab.setOnCloseRequest(event -> {
+                            event.consume(); // Prevent the tab from closing
+                            handleTabCloseRequest(loadedCharacterTab);
+                        });
+
 
                         // Update equipped items' buttons based on saved data
                         Map<String, String> equippedItemNames = loadedCharacterData.getEquippedItemNames();
